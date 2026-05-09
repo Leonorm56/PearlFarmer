@@ -23,3 +23,6 @@ execSync("git push origin main");
 execSync(`gh release create v${version} "apps/purrfect-farmer/dist-bundle/nilechain-v${version}.zip" --title "NileChain v${version}" --notes "NileChain v${version}" --repo Leonorm56/NileChain`);
 
 console.log("Released v" + version);
+const extPkg = JSON.parse(readFileSync("apps/purrfect-farmer/package.json", "utf8"));
+extPkg.version = version;
+writeFileSync("apps/purrfect-farmer/package.json", JSON.stringify(extPkg, null, 2));

@@ -19,8 +19,9 @@ const defaultSharedSettings = {
   proxyUsername: "",
   proxyPassword: "",
   shareCloudProxy: true,
-  telegramClient: "purrfect-gram",
+  telegramClient: "nile-gram",
   preferredTelegramWebVersion: "k",
 };
 
 export default defaultSharedSettings;
+
