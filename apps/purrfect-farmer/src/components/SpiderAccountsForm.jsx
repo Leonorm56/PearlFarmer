@@ -98,7 +98,7 @@ export default function SpiderAccountsForm({ country, clearSelection }) {
             }
           );
 
-          /** Open Purrfect Gram */
+          /** Open Nile Gram */
           setActiveTab("telegram-web-k");
         });
       };

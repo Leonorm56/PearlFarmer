@@ -102,7 +102,7 @@ export default memo(function FarmerOptionsGroup({
       <SettingsLabel>Telegram Client</SettingsLabel>
 
       <div className="grid grid-cols-2 gap-2">
-        {["purrfect-gram", "telegram-web"].map((client) => (
+        {["nile-gram", "telegram-web"].map((client) => (
           <SettingsGridButton
             key={client}
             onClick={() =>
@@ -117,7 +117,7 @@ export default memo(function FarmerOptionsGroup({
                 : null,
             )}
           >
-            {client === "purrfect-gram" ? "Purrfect Gram" : "Telegram Web"}
+            {client === "nile-gram" ? "Nile Gram" : "Telegram Web"}
           </SettingsGridButton>
         ))}
       </div>

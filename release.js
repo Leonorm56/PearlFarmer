@@ -6,23 +6,20 @@ const [major, minor, patch] = pkg.version.split(".").map(Number);
 pkg.version = `${major}.${minor}.${patch + 1}`;
 writeFileSync("package.json", JSON.stringify(pkg, null, 2));
 
+const extPkg = JSON.parse(readFileSync("apps/purrfect-farmer/package.json", "utf8"));
+extPkg.version = pkg.version;
+writeFileSync("apps/purrfect-farmer/package.json", JSON.stringify(extPkg, null, 2));
+
 const version = pkg.version;
 
-// Build
 execSync("pnpm build:farmer", { stdio: "inherit" });
 
-// Rename zip
-execSync(`cd apps/purrfect-farmer/dist-bundle && ren "purrfect-farmer-v6.1.1.zip" "nilechain-v${version}.zip"`, { shell: "cmd" });
+execSync(`cd apps/purrfect-farmer/dist-bundle && ren "purrfect-farmer-v${version}.zip" "nilechain-v${version}.zip"`, { shell: "cmd" });
 
-// Commit and push
 execSync("git add -A");
 execSync(`git commit -m "Release v${version}"`);
 execSync("git push origin main");
 
-// Create release with zip
 execSync(`gh release create v${version} "apps/purrfect-farmer/dist-bundle/nilechain-v${version}.zip" --title "NileChain v${version}" --notes "NileChain v${version}" --repo Leonorm56/NileChain`);
 
 console.log("Released v" + version);
-const extPkg = JSON.parse(readFileSync("apps/purrfect-farmer/package.json", "utf8"));
-extPkg.version = version;
-writeFileSync("apps/purrfect-farmer/package.json", JSON.stringify(extPkg, null, 2));

@@ -174,10 +174,10 @@ export const utils = [
   {
     name: "Telegram Web",
     list: [
-      /** Telegram to Purrfect Gram */
+      /** Telegram to Nile Gram */
       {
         id: "telegram-to-purrfect-gram",
-        title: "Telegram to Purrfect Gram",
+        title: "Telegram to Nile Gram",
         icon: TelegramToPurrfectGramIcon,
         component: createElement(TelegramToPurrfectGram),
       },

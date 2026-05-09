@@ -32,7 +32,7 @@ const TabContent = ({ title, children, ...props }) => (
 
 export default function TelegramToPurrfectGram() {
   const tabs = useMirroredTabs("telegram-web-transfer", [
-    "purrfect-gram",
+    "nile-gram",
     "telegram-web",
   ]);
   const { messaging, closeTab, pushTab } = useAppContext();
@@ -62,7 +62,7 @@ export default function TelegramToPurrfectGram() {
   );
 
   const [, dispatchAndTransferData] = useMirroredCallback(
-    "app.telegram-to-purrfect-gram",
+    "app.telegram-to-nile-gram",
     async (receiver = "telegram-web") => {
       const getTelegramWebLocalStorage = () => {
         return new Promise((resolve) => {
@@ -139,20 +139,20 @@ export default function TelegramToPurrfectGram() {
 
   return (
     <Tabs tabs={tabs} rootClassName="grow overflow-auto">
-      <TabContent value="purrfect-gram" title={"Purrfect Gram"}>
+      <TabContent value="nile-gram" title={"Nile Gram"}>
         <Alert variant={"warning"} className="text-center">
-          You are about to migrate all data from Telegram Web into Purrfect
+          You are about to migrate all data from Telegram Web into Nile
           Gram.
         </Alert>
 
-        <PrimaryButton onClick={() => dispatchAndTransferData("purrfect-gram")}>
+        <PrimaryButton onClick={() => dispatchAndTransferData("nile-gram")}>
           Transfer Now
         </PrimaryButton>
       </TabContent>
 
       <TabContent value="telegram-web" title={"Telegram Web"}>
         <Alert variant={"warning"} className="text-center">
-          You are about to migrate all data from Purrfect Gram into Telegram
+          You are about to migrate all data from Nile Gram into Telegram
           Web.
         </Alert>
 

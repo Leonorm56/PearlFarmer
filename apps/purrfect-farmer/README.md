@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://t.me/purrfect_community" target="_blank">
-    <img src="public/icon.png" width="192" alt="Purrfect Farmer Logo">
+    <img src="public/icon.png" width="192" alt="NileChain Logo">
   </a>
 </p>
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-**Purrfect Farmer** is a comprehensive automation tool designed specifically for Telegram Mini-Apps and bots. It supports multiple deployment modes including standalone Chrome Extension, PWA (Progressive Web App), and integration with Purrfect Whiskers for advanced multi-account management.
+**NileChain** is a comprehensive automation tool designed specifically for Telegram Mini-Apps and bots. It supports multiple deployment modes including standalone Chrome Extension, PWA (Progressive Web App), and integration with Nile Whiskers for advanced multi-account management.
 
 ### Key Features
 
@@ -163,7 +163,7 @@ serve -s dist -l 3000
 **Installation as PWA:**
 1. Open the hosted URL in Chrome
 2. Click the install icon in the address bar
-3. Or go to Settings → Install Purrfect Farmer
+3. Or go to Settings → Install NileChain
 
 ---
 
@@ -292,7 +292,7 @@ apps/purrfect-farmer/
 - Recommended for single device
 
 **Cloud Session:**
-- Session used by Purrfect Fly
+- Session used by Nile Fly
 - Multi-device access
 - Centralized management
 - Requires Fly backend
@@ -365,27 +365,27 @@ pnpm clean
 
 ---
 
-## Integration with Purrfect Fly
+## Integration with Nile Fly
 
-Connect to [Purrfect Fly](../purrfect-fly) for cloud-based farming:
+Connect to [Nile Fly](../purrfect-fly) for cloud-based farming:
 
-1. **Deploy Purrfect Fly** on your server
-2. **Open Cloud Manager** in Purrfect Farmer settings
+1. **Deploy Nile Fly** on your server
+2. **Open Cloud Manager** in NileChain settings
 3. **Configure Server URL** and authenticate with JWT token
 4. **Manage cloud farming:**
    - Add/remove accounts
    - Enable/disable farmers
    - Monitor farming progress
 
-**Note:** Cloud Manager is a built-in tool in Purrfect Farmer that provides an interface to manage your Purrfect Fly server.
+**Note:** Cloud Manager is a built-in tool in NileChain that provides an interface to manage your Nile Fly server.
 
-See [Purrfect Fly README](../purrfect-fly/README.md) for server setup.
+See [Nile Fly README](../purrfect-fly/README.md) for server setup.
 
 ---
 
 ## Supported Farmers
 
-Purrfect Farmer supports 20+ Telegram bots including game bots, earning bots, airdrop bots, task bots, and more. Farmers are continuously updated and new ones added regularly.
+NileChain supports 20+ Telegram bots including game bots, earning bots, airdrop bots, task bots, and more. Farmers are continuously updated and new ones added regularly.
 
 ---
 

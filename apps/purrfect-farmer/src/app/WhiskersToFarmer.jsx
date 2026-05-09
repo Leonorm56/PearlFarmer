@@ -97,7 +97,7 @@ export default function WhiskersToFarmer() {
               }
             );
 
-            /** Open Purrfect Gram */
+            /** Open Nile Gram */
             setActiveTab("telegram-web-k");
           });
         };
