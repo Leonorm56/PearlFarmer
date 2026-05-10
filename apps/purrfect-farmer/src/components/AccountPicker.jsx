@@ -11,8 +11,8 @@ import { BsStopCircle } from "react-icons/bs";
 import Container from "./Container";
 import { Dialog } from "radix-ui";
 import Input from "./Input";
-import { LiaUser } from "react-icons/lia";
 import { PiUserCirclePlusBold } from "react-icons/pi";
+import NileChainLogo from "@/assets/images/nilechain-logo.svg";
 import { cn } from "@/utils";
 import { memo } from "react";
 import useAppContext from "@/hooks/useAppContext";
@@ -70,17 +70,8 @@ const AccountSelector = memo(
               "group",
             )}
           >
-            {/* User  */}
-            {user?.["photo_url"] ? (
-              <img
-                src={user?.["photo_url"]}
-                className="size-8 shrink-0 rounded-full"
-              />
-            ) : (
-              <div className="p-1 shrink-0">
-                <LiaUser className="size-5" />
-              </div>
-            )}
+            {/* NileChain Logo */}
+            <img src={NileChainLogo} className="size-8 shrink-0" />
 
             <div className="flex flex-col grow min-w-0">
               {/* Title */}

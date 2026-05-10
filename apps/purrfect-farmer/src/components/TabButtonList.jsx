@@ -1,8 +1,8 @@
 import useAppContext from "@/hooks/useAppContext";
 import { Dialog } from "radix-ui";
-import { LiaUser } from "react-icons/lia";
-import { cn } from "@/utils";
 import { memo, useMemo } from "react";
+
+import NileChainLogo from "@/assets/images/nilechain-logo.svg";
 
 import AccountPicker from "./AccountPicker";
 import TabButton from "./TabButton";
@@ -63,27 +63,15 @@ export default memo(function TabButtonList({ tabs }) {
           open={showAccountPicker}
           onOpenChange={dispatchAndSetShowAccountPicker}
         >
-          {account.user ? (
-            <Dialog.Trigger
-              title={userFullName}
-              className="shrink-0 rounded-full"
-            >
-              <img
-                src={account.user["photo_url"]}
-                className="rounded-full size-8"
-              />
-            </Dialog.Trigger>
-          ) : (
-            <Dialog.Trigger
-              className={cn(
-                "flex items-center justify-center",
-                "shrink-0 p-2 rounded-full",
-                "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm"
-              )}
-            >
-              <LiaUser className="size-5" />
-            </Dialog.Trigger>
-          )}
+          <Dialog.Trigger
+            title={userFullName}
+            className="shrink-0 rounded-full"
+          >
+            <img
+              src={NileChainLogo}
+              className="size-8"
+            />
+          </Dialog.Trigger>
 
           <AccountPicker />
         </Dialog.Root>
