@@ -271,7 +271,7 @@ export default memo(function FarmerLinks() {
                             link={link}
                             refetch={() => updateLink(link)}
                             className={cn(
-                              "rounded-full shrink-0 bg-neutral-200 dark:bg-neutral-600",
+                              "rounded-full shrink-0 bg-neutral-200 dark:bg-[#243B55]",
                               showAsGrid ? "w-10 h-10" : "w-8 h-8",
                             )}
                           />
@@ -421,5 +421,6 @@ export default memo(function FarmerLinks() {
     </BottomDialog.Container>
   );
 });
+
 
 

@@ -64,7 +64,7 @@ export default memo(function Donate() {
                     className={cn(
                       "flex items-center justify-center shrink-0",
                       "w-8 h-8 rounded-full",
-                      "bg-neutral-200 dark:bg-neutral-600"
+                      "bg-neutral-200 dark:bg-[#243B55]"
                     )}
                     onClick={() => {
                       copy(network.address);
@@ -113,5 +113,6 @@ export default memo(function Donate() {
     </Dialog.Portal>
   );
 });
+
 
 

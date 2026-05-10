@@ -7,3 +7,4 @@ const encryption = wrap(worker);
 export { encryption };
 
 
+
