@@ -10,7 +10,9 @@ export default function Onboarding() {
   return (
     <div className="flex flex-col gap-2 justify-center min-h-dvh max-w-96 mx-auto p-4">
       {/* App Icon */}
-      <img src={WelcomeIcon} className="mx-auto h-28" />
+      <div className="mx-auto p-1.5 rounded-2xl border-2 border-nile-gold-500/60 bg-white/30 dark:bg-white/[0.04]">
+        <img src={WelcomeIcon} className="h-28 rounded-xl" />
+      </div>
 
       {/* App Title */}
       <h3
