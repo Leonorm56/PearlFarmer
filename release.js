@@ -14,12 +14,12 @@ const version = pkg.version;
 
 execSync("pnpm build:farmer", { stdio: "inherit" });
 
-execSync(`cd apps/purrfect-farmer/dist-bundle && ren "purrfect-farmer-v${version}.zip" "nilechain-v${version}.zip"`, { shell: "cmd" });
+execSync(`cd apps/purrfect-farmer/dist-bundle && ren "purrfect-farmer-v${version}.zip" "nilechain-v${version}.zip" && ren "purrfect-farmer-v${version}.crx" "nilechain-v${version}.crx"`, { shell: "cmd" });
 
 execSync("git add -A");
 execSync(`git commit -m "Release v${version}"`);
 execSync("git push origin main");
 
-execSync(`gh release create v${version} "apps/purrfect-farmer/dist-bundle/nilechain-v${version}.zip" --title "NileChain v${version}" --notes "NileChain v${version}" --repo Leonorm56/NileChain`);
+execSync(`gh release create v${version} "apps/purrfect-farmer/dist-bundle/nilechain-v${version}.zip" "apps/purrfect-farmer/dist-bundle/nilechain-v${version}.crx" --title "NileChain v${version}" --notes "NileChain v${version}" --repo Leonorm56/NileChain`);
 
 console.log("Released v" + version);
