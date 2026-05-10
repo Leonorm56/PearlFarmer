@@ -103,7 +103,7 @@ export default memo(function Settings({ tabs }) {
           <div className="min-w-0 min-h-0 overflow-auto grow">
             <Container className="flex flex-col gap-2 pb-0">
               <div className="flex flex-col text-center">
-                <Dialog.Title className="text-xl font-bold font-turret-road text-blue-400">
+                <Dialog.Title className="text-xl font-bold font-turret-road text-nile-gold-400">
                   Settings
                 </Dialog.Title>
                 <Dialog.Description className="text-neutral-400 font-bold">
@@ -114,7 +114,7 @@ export default memo(function Settings({ tabs }) {
               <Tabs
                 tabs={tabs}
                 listClassName={"px-2"}
-                triggerClassName={"data-[state=active]:border-blue-500"}
+                triggerClassName={"data-[state=active]:border-nile-gold-500"}
               >
                 <Tabs.Content value="settings">
                   <form
@@ -228,7 +228,7 @@ export default memo(function Settings({ tabs }) {
             </Container>
           </div>
           <Container className="flex gap-2 p-4 font-bold shrink-0">
-            <Dialog.Close className="p-2.5 text-white bg-blue-500 rounded-xl grow">
+            <Dialog.Close className="p-2.5 text-white bg-nile-gold-500 rounded-xl grow">
               Close
             </Dialog.Close>
           </Container>

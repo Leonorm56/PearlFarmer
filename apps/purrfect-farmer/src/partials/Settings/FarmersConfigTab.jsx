@@ -33,7 +33,7 @@ export default memo(function FarmersConfigTab({
             key={style}
             className={cn(
               settings.farmersLayout === style
-                ? "bg-blue-200 dark:bg-blue-200 text-blue-800"
+                ? "bg-nile-gold-200 dark:bg-nile-gold-200 text-nile-gold-800"
                 : null
             )}
           >

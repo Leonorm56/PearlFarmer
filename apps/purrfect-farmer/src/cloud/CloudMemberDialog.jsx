@@ -29,7 +29,7 @@ const MemberDialogHeader = ({ account }) => (
           "items-center justify-center gap-2",
           "text-center",
           "text-xl truncate",
-          "text-blue-400 font-bold",
+          "text-nile-gold-400 font-bold",
           "title" in account ? "inline-flex" : "hidden",
         )}
       >
@@ -40,7 +40,7 @@ const MemberDialogHeader = ({ account }) => (
       <Dialog.Description
         className={cn(
           "px-2 font-bold text-base",
-          "text-center text-blue-400",
+          "text-center text-nile-gold-400",
         )}
       >
         @{account.user?.["username"] || account.id}
@@ -101,7 +101,7 @@ const MemberDialogFarmer = ({ account, farmer }) => {
     <div
       className={cn(
         "p-2 flex items-center gap-2 rounded-xl",
-        "border bg-neutral-100 dark:bg-neutral-800",
+        "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
       )}
     >
       {/* Farmer Icon */}
@@ -146,7 +146,7 @@ const MemberDialogFarmer = ({ account, farmer }) => {
           }
           className={cn(
             "shrink-0 flex items-center gap-2",
-            "text-blue-500 hover:underline",
+            "text-nile-gold-500 hover:underline",
           )}
         >
           {" "}
@@ -243,6 +243,5 @@ export default function CloudMemberDialog({ account, farmer }) {
     </BottomDialog.Container>
   );
 }
-
 
 

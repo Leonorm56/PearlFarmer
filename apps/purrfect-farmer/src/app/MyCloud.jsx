@@ -28,7 +28,7 @@ const MyCloudActionButton = ({ variant, ...props }) => (
       variant === "activate"
         ? "text-green-500 dark:text-green-400"
         : "text-red-500 dark:text-red-400",
-      "border bg-neutral-100 dark:bg-neutral-800",
+      "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
       "px-3 rounded-lg shrink-0",
     )}
   />
@@ -118,11 +118,11 @@ const MyCloudFarmers = () => {
           <button
             onClick={() => launchFarmer(farmer)}
             className={cn(
-              "border bg-neutral-100 dark:bg-neutral-800",
+              "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
               "flex items-center gap-2 p-2 text-left",
               "grow min-w-0 cursor-pointer rounded-xl",
               "border border-transparent",
-              "hover:border-blue-500",
+              "hover:border-nile-gold-500",
             )}
           >
             {/* Farmer Icon */}
@@ -212,6 +212,5 @@ export default function MyCloud() {
     </Container>
   );
 }
-
 
 

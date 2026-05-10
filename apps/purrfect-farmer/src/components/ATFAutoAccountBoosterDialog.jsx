@@ -19,8 +19,8 @@ const BoosterTabTrigger = ({ title, value }) => (
     className={cn(
       "px-4 py-2 truncate",
       "font-bold cursor-pointer",
-      "text-neutral-500 dark:text-neutral-400 hover:text-blue-400",
-      "data-[state=active]:text-blue-400 border-b-2 border-b-transparent",
+      "text-neutral-500 dark:text-neutral-400 hover:text-nile-gold-400",
+      "data-[state=active]:text-nile-gold-400 border-b-2 border-b-transparent",
       "data-[state=active]:border-b-orange-500",
       "focus:outline-none focus:ring-0",
     )}
@@ -74,7 +74,7 @@ function BoosterHeader({ account }) {
             toast.success("Address copied!");
           }}
           className={cn(
-            "text-xs text-blue-500 dark:text-blue-300 truncate",
+            "text-xs text-nile-gold-500 dark:text-nile-gold-300 truncate",
             "cursor-pointer hover:underline",
             "flex items-center gap-1",
           )}
@@ -93,7 +93,7 @@ function BoosterHeader({ account }) {
         className={cn(
           "size-10 shrink-0 rounded-full",
           "flex items-center justify-center",
-          "text-neutral-400 hover:text-blue-400 cursor-pointer",
+          "text-neutral-400 hover:text-nile-gold-400 cursor-pointer",
           "transition-colors",
         )}
       >
@@ -117,7 +117,7 @@ export default function ATFAutoAccountBooster({ account }) {
           onInteractOutside={(ev) => ev.preventDefault()}
           className={cn(
             "flex flex-col w-full h-full max-w-md max-h-[90vh]",
-            "border bg-white dark:bg-neutral-900 rounded-xl overflow-hidden",
+            "border bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl rounded-xl overflow-hidden",
           )}
         >
           {/* Header */}

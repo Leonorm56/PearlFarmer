@@ -35,7 +35,7 @@ export default memo(function UtilsPanel() {
       <Tabs
         tabs={utilsPanelTabs}
         rootClassName={"gap-4"}
-        triggerClassName={"data-[state=active]:border-blue-500"}
+        triggerClassName={"data-[state=active]:border-nile-gold-500"}
       >
         {/* Utils */}
         <Tabs.Content value="utils">
@@ -83,7 +83,7 @@ export default memo(function UtilsPanel() {
                 className={cn(
                   "inline-flex gap-2 items-center justify-center",
                   "py-2 px-4 rounded-lg shrink-0 font-bold",
-                  "text-white bg-blue-500",
+                  "text-white bg-nile-gold-500",
                 )}
                 onClick={() => {
                   isBotURL(telegramLink)
@@ -125,7 +125,7 @@ export default memo(function UtilsPanel() {
                   onClick={() => launchTab(tab)}
                   key={tab.id}
                   className={cn(
-                    "border bg-neutral-100 dark:bg-neutral-800",
+                    "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
                     "flex items-center gap-2 p-2 cursor-pointer rounded-xl",
                     "text-left",
                   )}
@@ -146,6 +146,5 @@ export default memo(function UtilsPanel() {
     </BottomDialog>
   );
 });
-
 
 

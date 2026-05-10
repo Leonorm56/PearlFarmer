@@ -48,7 +48,7 @@ export default memo(function SeekerOptionsGroup({
             "shrink-0",
             "inline-flex items-center justify-center",
             "px-4 rounded-lg shrink-0",
-            "border bg-neutral-100 dark:bg-neutral-800"
+            "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm"
           )}
         >
           <HiOutlineListBullet className="w-4 h-4 " />
@@ -68,6 +68,5 @@ export default memo(function SeekerOptionsGroup({
     </SettingsGroup>
   );
 });
-
 
 

@@ -37,7 +37,7 @@ const Tabs = ({
                 className={cn(
                   "p-2 truncate",
                   "border-b-4 border-transparent",
-                  "data-[state=active]:border-blue-500",
+                  "data-[state=active]:border-nile-gold-500",
                   triggerClassName,
                 )}
               >

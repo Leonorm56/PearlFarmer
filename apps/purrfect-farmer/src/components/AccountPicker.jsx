@@ -24,9 +24,9 @@ const PickerButton = (props) => (
     {...props}
     className={cn(
       "text-neutral-500 dark:text-neutral-400",
-      "border bg-neutral-100 dark:bg-neutral-800",
+      "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
       "hover:bg-orange-100 hover:text-orange-700",
-      "dark:hover:bg-orange-200 dark:hover:text-blue-400",
+      "dark:hover:bg-orange-200 dark:hover:text-nile-gold-400",
       "flex items-center justify-center",
       "px-3 rounded-xl shrink-0 touch-none",
       props.className,
@@ -63,9 +63,9 @@ const AccountSelector = memo(
             onClick={() => launchAccount(account.id)}
             className={cn(
               "px-2 py-1 rounded-xl text-left",
-              "border bg-neutral-100 dark:bg-neutral-800",
+              "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
               "hover:bg-orange-100 hover:text-orange-700",
-              "dark:hover:bg-orange-200 dark:hover:text-blue-400",
+              "dark:hover:bg-orange-200 dark:hover:text-nile-gold-400",
               "grow min-w-0 min-h-0 flex items-center gap-2",
               "group",
             )}
@@ -118,9 +118,9 @@ const AccountSelector = memo(
 
             {/* Active / running state */}
             {account.active ? (
-              <HiCheckBadge className="shrink-0 text-blue-400 size-4" />
+              <HiCheckBadge className="shrink-0 text-nile-gold-400 size-4" />
             ) : account.running ? (
-              <HiOutlineCheckBadge className="shrink-0 text-blue-400 size-4" />
+              <HiOutlineCheckBadge className="shrink-0 text-nile-gold-400 size-4" />
             ) : null}
           </Dialog.Close>
 
@@ -173,7 +173,7 @@ export default memo(function AccountPicker() {
     <BottomDialog.Container onOpenAutoFocus={(ev) => ev.preventDefault()}>
       <Container className="flex flex-col p-4 gap-4 shrink-0">
         <div className="flex flex-col text-center">
-          <Dialog.Title className="text-xl font-bold font-turret-road text-blue-400">
+          <Dialog.Title className="text-xl font-bold font-turret-road text-nile-gold-400">
             Accounts
           </Dialog.Title>
           <Dialog.Description className="text-neutral-400 font-bold">
@@ -219,7 +219,7 @@ export default memo(function AccountPicker() {
           <Dialog.Close
             onClick={() => addAccount()}
             className={cn(
-              "bg-blue-900 ",
+              "bg-nile-gold-900 ",
               "text-white",
               "p-2.5 rounded-xl shrink-0 font-bold",
               "flex items-center justify-center gap-2",
@@ -233,8 +233,8 @@ export default memo(function AccountPicker() {
         {/* Close Dialog */}
         <Dialog.Close
           className={cn(
-            "bg-blue-100 dark:bg-blue-700",
-            "text-blue-900 dark:text-blue-100",
+            "bg-blue-100 dark:bg-nile-gold-700",
+            "text-nile-gold-900 dark:text-nile-gold-100",
             "p-2.5 rounded-xl shrink-0 font-bold",
             "flex items-center justify-center gap-2",
           )}
@@ -245,6 +245,5 @@ export default memo(function AccountPicker() {
     </BottomDialog.Container>
   );
 });
-
 
 

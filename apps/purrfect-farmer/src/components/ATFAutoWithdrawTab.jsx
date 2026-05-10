@@ -114,7 +114,7 @@ export default function ATFAutoWithdrawTab() {
               <div className="flex flex-col gap-1">
                 <Label>
                   Delay in minutes{" "}
-                  <span className="text-blue-500 dark:text-blue-400">
+                  <span className="text-nile-gold-500 dark:text-nile-gold-400">
                     ({field.value}m)
                   </span>
                 </Label>
@@ -144,7 +144,7 @@ export default function ATFAutoWithdrawTab() {
               <div className="flex flex-col gap-1">
                 <Label>
                   Difference
-                  <span className="text-blue-500 dark:text-blue-400">
+                  <span className="text-nile-gold-500 dark:text-nile-gold-400">
                     ({field.value}%)
                   </span>
                 </Label>

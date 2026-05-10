@@ -37,11 +37,11 @@ export default function ATFAutoCollectTab() {
             Collected: {mutation.data.results.filter((r) => r.status).length} /{" "}
             {mutation.data.results.length}
           </p>
-          <p className="text-blue-400">
+          <p className="text-nile-gold-400">
             Skipped (no balance):{" "}
             {mutation.data.results.filter((r) => r.skipped).length}
           </p>
-          <p className="text-blue-500">
+          <p className="text-nile-gold-500">
             Total collected: {mutation.data.totalCollected} ATF
           </p>
           <PrimaryButton type="button" onClick={() => mutation.reset()}>

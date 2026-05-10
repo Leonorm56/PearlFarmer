@@ -29,13 +29,13 @@ export default function SpiderCountries({
               className={cn(
                 "flex items-center gap-2",
                 "p-2.5 text-left rounded-xl",
-                "border bg-neutral-100 dark:bg-neutral-800",
+                "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
                 "hover:bg-neutral-200 dark:hover:bg-neutral-600"
               )}
             >
               <span>{item.emoji}</span>
               <span className="flex-1 font-bold">{item.name}</span>
-              <span className="font-bold text-blue-400">${item.price}</span>
+              <span className="font-bold text-nile-gold-400">${item.price}</span>
             </button>
           ))}
         </Container>
@@ -43,6 +43,5 @@ export default function SpiderCountries({
     </div>
   );
 }
-
 
 

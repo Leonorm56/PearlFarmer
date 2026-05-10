@@ -75,7 +75,7 @@ export default function ATFAutoMasterEditDialog({ onSave }) {
           <button
             type="button"
             onClick={() => openTelegramLink("https://t.me/toncenter")}
-            className="text-xs text-blue-500 dark:text-blue-400 hover:underline cursor-pointer"
+            className="text-xs text-nile-gold-500 dark:text-nile-gold-400 hover:underline cursor-pointer"
           >
             Get API key from @toncenter
           </button>

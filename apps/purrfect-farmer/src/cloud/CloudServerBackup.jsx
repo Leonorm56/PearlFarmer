@@ -68,7 +68,7 @@ const ServerBackupAndRestore = () => {
       <Tabs.Content value="import">
         <div
           {...getRootProps()}
-          className="border border-dashed border-blue-500 px-4 py-10 text-center rounded-xl"
+          className="border border-dashed border-nile-gold-500 px-4 py-10 text-center rounded-xl"
         >
           <input {...getInputProps()} />
           {isDragActive ? (

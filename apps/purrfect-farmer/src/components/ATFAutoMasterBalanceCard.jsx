@@ -99,7 +99,7 @@ export function ATFAutoMasterBalanceCard() {
           copy(master.address);
           toast.success("Copied");
         }}
-        className="font-mono flex items-center justify-center gap-1 text-blue-300"
+        className="font-mono flex items-center justify-center gap-1 text-nile-gold-300"
       >
         <MdOutlineContentCopy /> <ATFAutoAddress address={master?.address} />
       </button>

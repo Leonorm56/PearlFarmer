@@ -24,7 +24,7 @@ const ProxyDetailsItem = ({ label, value }) => {
     <div
       className={cn(
         "p-2.5 flex items-center gap-2 rounded-xl",
-        "border bg-neutral-200 dark:bg-neutral-700"
+        "border bg-white/80 dark:bg-white/[0.10] backdrop-blur-md"
       )}
     >
       {/* Details */}
@@ -61,7 +61,7 @@ const ProxyDetails = ({ proxy, rootClassName, ...props }) => {
     <Collapsible.Root
       {...props}
       className={cn(
-        "border bg-neutral-100 dark:bg-neutral-800",
+        "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
         "flex flex-col gap-2",
         "p-2 rounded-xl",
         rootClassName
@@ -70,8 +70,8 @@ const ProxyDetails = ({ proxy, rootClassName, ...props }) => {
       <Collapsible.Trigger
         className={cn(
           "p-2 flex items-center gap-2 rounded-xl",
-          "border bg-neutral-200 dark:bg-neutral-700",
-          "border border-transparent hover:border-blue-500"
+          "border bg-white/80 dark:bg-white/[0.10] backdrop-blur-md",
+          "border border-transparent hover:border-nile-gold-500"
         )}
       >
         {/* Proxy Icon */}
@@ -125,6 +125,5 @@ const ProxyDetails = ({ proxy, rootClassName, ...props }) => {
 };
 
 export default ProxyDetails;
-
 
 

@@ -10,7 +10,7 @@ export default memo(function ResetButton(props) {
       className={cn(
         "inline-flex items-center justify-center",
         "px-4 rounded-lg shrink-0",
-        "border bg-neutral-100 dark:bg-neutral-800",
+        "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
         "disabled:opacity-50",
         props.className
       )}
@@ -19,6 +19,5 @@ export default memo(function ResetButton(props) {
     </button>
   );
 });
-
 
 

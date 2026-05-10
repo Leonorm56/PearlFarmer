@@ -10,8 +10,8 @@ export default memo(function Toggle({ className, ...props }) {
           "shrink-0",
           "relative rounded-full",
           "inline-flex h-6 w-11 items-center",
-          "border bg-neutral-200 dark:bg-neutral-700",
-          "peer-checked:bg-blue-500",
+          "border bg-white/80 dark:bg-white/[0.10] backdrop-blur-md",
+          "peer-checked:bg-nile-gold-500",
 
           // Before
           "peer-checked:before:translate-x-6 before:translate-x-1",

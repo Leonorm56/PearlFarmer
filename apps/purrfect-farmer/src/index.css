@@ -64,6 +64,19 @@
   --color-wonton-green-950: #000000;
   --color-wonton-green: #7de701;
 
+  --color-nile-gold-50: #fefcf3;
+  --color-nile-gold-100: #fdf6e0;
+  --color-nile-gold-200: #fbe9b3;
+  --color-nile-gold-300: #f8db80;
+  --color-nile-gold-400: #E8C454;
+  --color-nile-gold-500: #D4A843;
+  --color-nile-gold-600: #C99A36;
+  --color-nile-gold-700: #BF8E2A;
+  --color-nile-gold-800: #A67A1E;
+  --color-nile-gold-900: #8A6615;
+  --color-nile-gold-950: #6B4F0E;
+  --color-nile-gold: #D4A843;
+
   --color-neutral-50: #f0f4fa;
   --color-neutral-100: #dee6f0;
   --color-neutral-200: #c4d2e6;
@@ -91,7 +104,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    @apply border-neutral-400 dark:border-neutral-500;
+    @apply border-neutral-300 dark:border-neutral-400;
   }
 
   /* Override scrollbar styles */
@@ -115,6 +128,11 @@
 }
 
 /* Override injected styles */
+html {
+  @apply bg-neutral-50 dark:bg-neutral-900;
+}
+
 body {
-  @apply font-sans text-xs;
+  @apply font-sans text-xs bg-gradient-to-b from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-950;
+  background-attachment: fixed;
 }

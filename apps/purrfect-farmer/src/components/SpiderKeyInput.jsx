@@ -29,7 +29,7 @@ export default function SpiderKeyInput() {
 
         <button
           className={cn(
-            "px-4 bg-blue-600 text-white rounded-lg hover:bg-orange-600",
+            "px-4 bg-nile-gold-600 text-white rounded-lg hover:bg-orange-600",
             "shrink-0 rounded-xl font-bold",
           )}
           onClick={handleSave}
@@ -43,7 +43,7 @@ export default function SpiderKeyInput() {
           href="https://t.me/S_PIDERRBot?start=1147265290"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-400"
+          className="text-nile-gold-400"
         >
           Spider Bot
         </a>

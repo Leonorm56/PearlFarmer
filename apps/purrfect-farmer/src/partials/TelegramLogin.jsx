@@ -369,7 +369,7 @@ export default function TelegramLogin({
         <button
           onClick={() => dispatchAndHandleQuickSignIn()}
           className={cn(
-            "text-center text-blue-400",
+            "text-center text-nile-gold-400",
             "flex items-center justify-center gap-2"
           )}
         >

@@ -57,7 +57,7 @@ export default memo(function TabButton({
         "cursor-pointer",
         "flex gap-1 items-center",
         "p-1.5 rounded-full shrink-0",
-        tab.active ? "border bg-neutral-100 dark:bg-neutral-800" : null,
+        tab.active ? "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm" : null,
       )}
     >
       {/* Icon */}
@@ -147,6 +147,5 @@ export default memo(function TabButton({
     </div>
   );
 });
-
 
 

@@ -15,7 +15,7 @@ export default function CloudStatus(props) {
         "text-center flex items-center justify-center gap-2",
         props.className,
         {
-          pending: "text-blue-400",
+          pending: "text-nile-gold-400",
           success: "text-green-600 dark:text-green-500",
           error: "text-red-500",
         }[status],
@@ -32,7 +32,7 @@ export default function CloudStatus(props) {
                   ? `Session: ${cloudTelegramSession}`
                   : "No active session"
               }
-              className={cn(!cloudTelegramSession && "text-blue-400")}
+              className={cn(!cloudTelegramSession && "text-nile-gold-400")}
             >
               (
               {cloudTelegramSession ? (

@@ -26,7 +26,7 @@ const InfoButton = (props) => (
 );
 
 const InfoRow = ({ label, value, canCopy, valueClassName, rightContent }) => (
-  <div className="flex gap-2 p-2 items-center rounded-xl border bg-neutral-100 dark:bg-neutral-800">
+  <div className="flex gap-2 p-2 items-center rounded-xl border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md">
     <div className="flex flex-col gap-1 grow min-w-0">
       <span className="font-bold text-neutral-500 dark:text-neutral-400">
         {label}
@@ -84,7 +84,7 @@ export default function ATFAutoAccountDetails({ account }) {
         label="Address"
         value={account.address}
         canCopy
-        valueClassName="text-blue-500 dark:text-blue-300"
+        valueClassName="text-nile-gold-500 dark:text-nile-gold-300"
       />
 
       <InfoRow
@@ -108,20 +108,20 @@ export default function ATFAutoAccountDetails({ account }) {
       />
 
       {/* Balances */}
-      <div className="flex flex-col gap-1 p-2 rounded-xl border bg-neutral-100 dark:bg-neutral-800">
+      <div className="flex flex-col gap-1 p-2 rounded-xl border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md">
         <span className="font-bold text-neutral-500 dark:text-neutral-400">
           Balances
         </span>
         {balances ? (
           <div className="flex gap-4 font-bold">
             {/* TON */}
-            <span className="inline-flex items-center gap-1 text-blue-500 dark:text-blue-300">
+            <span className="inline-flex items-center gap-1 text-nile-gold-500 dark:text-nile-gold-300">
               <img src={TonIcon} className="size-4" />
               {balances.ton.toFixed(4)} TON
             </span>
 
             {/* Jetton */}
-            <span className="inline-flex items-center gap-1 text-blue-400 dark:text-orange-400">
+            <span className="inline-flex items-center gap-1 text-nile-gold-400 dark:text-orange-400">
               <img src={ATFIcon} className="size-4 rounded-full" />
               {balances.jetton.toFixed(2)} ATF
             </span>

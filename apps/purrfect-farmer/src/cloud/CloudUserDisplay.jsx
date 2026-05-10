@@ -52,7 +52,7 @@ export default function CloudUserDisplay() {
               open={openServerUpdate}
               onOpenChange={setOpenServerUpdate}
             >
-              <Dialog.Trigger className="text-blue-400">
+              <Dialog.Trigger className="text-nile-gold-400">
                 Server
               </Dialog.Trigger>
 
@@ -71,7 +71,7 @@ export default function CloudUserDisplay() {
               open={openPasswordUpdate}
               onOpenChange={setOpenPasswordUpdate}
             >
-              <Dialog.Trigger className="text-blue-500">
+              <Dialog.Trigger className="text-nile-gold-500">
                 Password
               </Dialog.Trigger>
 

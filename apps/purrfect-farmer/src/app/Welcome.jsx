@@ -58,8 +58,8 @@ const TelegramWebButton = memo(
       className={cn(
         "p-2",
         "rounded-full",
-        "border bg-neutral-100 dark:bg-neutral-800",
-        "hover:bg-blue-500 dark:hover:bg-blue-800",
+        "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
+        "hover:bg-nile-gold-500 dark:hover:bg-nile-gold-800",
         "hover:text-white",
         "inline-flex items-center justify-center gap-1",
         props.className,
@@ -290,7 +290,7 @@ export default memo(function Welcome() {
                 <HiBoltSlash className="size-5 shrink-0 text-red-500" />
               )
             ) : (
-              <HiOutlineGlobeAlt className="size-5 shrink-0 text-blue-500" />
+              <HiOutlineGlobeAlt className="size-5 shrink-0 text-nile-gold-500" />
             )}
             <h3
               className={cn(
@@ -304,7 +304,7 @@ export default memo(function Welcome() {
 
           {/* App Version */}
           <p className="text-lg leading-none text-center">
-            <span className={cn("font-turret-road font-bold text-blue-400")}>
+            <span className={cn("font-turret-road font-bold text-nile-gold-400")}>
               v{__APP_PACKAGE_VERSION__}
             </span>
           </p>
@@ -319,7 +319,7 @@ export default memo(function Welcome() {
           {/* Farmer Title */}
           <p
             onClick={configureAppSettings}
-            className="font-bold leading-none text-center text-blue-500 cursor-pointer"
+            className="font-bold leading-none text-center text-nile-gold-500 cursor-pointer"
           >
             {account.title || "TGUser"}
           </p>
@@ -369,10 +369,10 @@ export default memo(function Welcome() {
                   onClick={() => dispatchAndOpenFarmerBot(v)}
                   className={cn(
                     "border border-transparent",
-                    "dark:border-blue-600",
+                    "dark:border-nile-gold-600",
                     "bg-orange-100 dark:bg-transparent",
-                    "text-orange-900 dark:text-blue-400",
-                    "hover:bg-blue-600 dark:hover:bg-blue-600",
+                    "text-orange-900 dark:text-nile-gold-400",
+                    "hover:bg-nile-gold-600 dark:hover:bg-nile-gold-600",
                   )}
                   title={`Open ${
                     import.meta.env.VITE_APP_BOT_NAME
@@ -407,8 +407,8 @@ export default memo(function Welcome() {
               "rounded-lg",
               "border-b-0",
               "data-[state=active]:bg-blue-100",
-              "data-[state=active]:text-blue-800",
-              "dark:data-[state=active]:bg-blue-900",
+              "data-[state=active]:text-nile-gold-800",
+              "dark:data-[state=active]:bg-nile-gold-900",
               "dark:data-[state=active]:text-blue-100",
               "uppercase",
             )}
@@ -444,7 +444,7 @@ export default memo(function Welcome() {
                   "font-bold",
                   "flex items-center justify-center",
                   "rounded-lg shrink-0",
-                  "bg-blue-100 text-blue-800",
+                  "bg-blue-100 text-nile-gold-800",
                   "p-2",
                 )}
               >
@@ -514,10 +514,10 @@ export default memo(function Welcome() {
                 <a
                   role="button"
                   className={cn(
-                    "text-blue-500",
+                    "text-nile-gold-500",
                     "px-4 py-2",
                     "rounded-full",
-                    "border border-blue-500",
+                    "border border-nile-gold-500",
                     "flex items-center justify-center gap-2",
                   )}
                 >
@@ -535,6 +535,5 @@ export default memo(function Welcome() {
     </>
   );
 });
-
 
 

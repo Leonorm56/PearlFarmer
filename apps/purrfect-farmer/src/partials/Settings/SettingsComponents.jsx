@@ -54,7 +54,7 @@ export const SettingsGridButton = (props) => (
   <button
     {...props}
     className={cn(
-      "border bg-neutral-100 dark:bg-neutral-800",
+      "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
       "disabled:opacity-60",
       "p-2 rounded-lg",
       "flex gap-1 items-center justify-center",
@@ -82,8 +82,8 @@ export const SettingsGroup = memo(({ id, title, icon, children }) => {
     <Accordion.Item value={id} className={cn("flex flex-col gap-2")}>
       <Accordion.Trigger
         className={cn(
-          "border bg-neutral-100 dark:bg-neutral-800",
-          "data-[state=open]:bg-blue-500",
+          "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
+          "data-[state=open]:bg-nile-gold-500",
           "data-[state=open]:text-white",
           "flex items-center gap-4 p-2 cursor-pointer rounded-xl",
           "group"
@@ -102,7 +102,7 @@ export const SettingsGroup = memo(({ id, title, icon, children }) => {
           "flex flex-col gap-2",
           "after:w-2/4 after:h-2",
           "after:rounded-full",
-          "after:bg-blue-400",
+          "after:bg-nile-gold-400",
           "after:mx-auto",
           "after:my-1"
         )}
@@ -121,7 +121,7 @@ export const DropReorderItem = memo(({ children, ...props }) => {
         <div className="min-w-0 min-h-0 grow">{children}</div>
         <button
           className={cn(
-            "border bg-neutral-100 dark:bg-neutral-800",
+            "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
             "flex items-center justify-center",
             "px-3 rounded-lg shrink-0",
             "touch-none"
@@ -134,6 +134,5 @@ export const DropReorderItem = memo(({ children, ...props }) => {
     </Reorder.Item>
   );
 });
-
 
 

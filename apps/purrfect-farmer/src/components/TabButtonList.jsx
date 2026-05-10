@@ -78,7 +78,7 @@ export default memo(function TabButtonList({ tabs }) {
               className={cn(
                 "flex items-center justify-center",
                 "shrink-0 p-2 rounded-full",
-                "border bg-neutral-100 dark:bg-neutral-800"
+                "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm"
               )}
             >
               <LiaUser className="size-5" />
@@ -91,6 +91,5 @@ export default memo(function TabButtonList({ tabs }) {
     </div>
   );
 });
-
 
 

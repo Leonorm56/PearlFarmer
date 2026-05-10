@@ -4,7 +4,7 @@ export default function ATFAutoHeader() {
   return (
     <div className="flex flex-col gap-2 justify-center items-center">
       <img src={ATFIcon} className="size-32" />
-      <h1 className="font-turret-road text-center text-3xl text-blue-400">
+      <h1 className="font-turret-road text-center text-3xl text-nile-gold-400">
         ATF Auto
       </h1>
     </div>

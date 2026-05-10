@@ -52,7 +52,7 @@ export default memo(function ATFAutoAccountItem({
         className={cn(
           "flex gap-2 items-center",
           "p-1.5 rounded-xl",
-          "border bg-neutral-100 dark:bg-neutral-800",
+          "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
           "hover:bg-neutral-200 dark:hover:bg-neutral-600",
           "transition-colors group",
         )}
@@ -78,7 +78,7 @@ export default memo(function ATFAutoAccountItem({
               {account.title}
             </h3>
             {/* Address */}
-            <div className="flex items-center gap-1.5 text-blue-800 dark:text-blue-100">
+            <div className="flex items-center gap-1.5 text-nile-gold-800 dark:text-nile-gold-100">
               <ATFAutoAddress address={account.address} />
               <ATFAutoVersionBadge version={account.version} />
             </div>
@@ -126,6 +126,5 @@ export default memo(function ATFAutoAccountItem({
     </Reorder.Item>
   );
 });
-
 
 

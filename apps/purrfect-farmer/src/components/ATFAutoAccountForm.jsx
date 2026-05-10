@@ -150,7 +150,7 @@ export default function ATFAutoAccountForm({
                     type="button"
                     onClick={generatePhrase}
                     className={cn(
-                      " text-blue-500 dark:text-blue-400",
+                      " text-nile-gold-500 dark:text-nile-gold-400",
                       "cursor-pointer hover:underline disabled:opacity-50",
                       "flex items-center gap-1",
                     )}
@@ -166,7 +166,7 @@ export default function ATFAutoAccountForm({
 
         {/* Address Preview */}
         {address && (
-          <p className="text-center text-blue-500 dark:text-blue-400 px-2 wrap-break-word font-bold">
+          <p className="text-center text-nile-gold-500 dark:text-nile-gold-400 px-2 wrap-break-word font-bold">
             {address}
           </p>
         )}

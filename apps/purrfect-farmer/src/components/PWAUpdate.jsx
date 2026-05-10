@@ -24,7 +24,7 @@ export default function PWAUpdate() {
 
   return needRefresh ? (
     <PrimaryButton
-      className="bg-blue-600 rounded-none"
+      className="bg-nile-gold-600 rounded-none"
       onClick={() => dispatchAndUpdateServiceWorker()}
     >
       Click to Update

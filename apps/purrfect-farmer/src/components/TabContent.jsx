@@ -19,7 +19,7 @@ const LinkButton = (props) => {
       className={cn(
         "flex items-center justify-center gap-2",
         "h-10 font-bold",
-        "text-blue-500 dark:text-blue-300",
+        "text-nile-gold-500 dark:text-nile-gold-300",
         "border-b dark:border-neutral-600",
         "shrink-0",
       )}
@@ -129,7 +129,7 @@ export default memo(function TabContent({ tab }) {
       >
         {/* Unpublished status */}
         {tab.FarmerClass && !tab.FarmerClass.published ? (
-          <div className="bg-blue-600 p-2 text-center font-bold">
+          <div className="bg-nile-gold-600 p-2 text-center font-bold">
             Under development
           </div>
         ) : null}

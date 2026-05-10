@@ -152,7 +152,7 @@ export default function WhiskersToFarmer() {
       <div
         {...getRootProps()}
         className={cn(
-          "border border-dashed border-blue-500",
+          "border border-dashed border-nile-gold-500",
           "px-4 py-10 w-full",
           "text-center rounded-xl"
         )}

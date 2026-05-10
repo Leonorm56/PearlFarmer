@@ -47,7 +47,7 @@ function HeadlessPicker() {
     <Container className="flex flex-col gap-2 p-4">
       <div className="flex flex-col gap-2 justify-center items-center">
         <img src={AppIcon} className="h-24" />
-        <h1 className="font-turret-road text-center text-2xl text-blue-400">
+        <h1 className="font-turret-road text-center text-2xl text-nile-gold-400">
           Headless Mode
         </h1>
       </div>

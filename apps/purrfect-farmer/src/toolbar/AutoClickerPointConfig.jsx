@@ -31,7 +31,7 @@ const DialogTitle = styled(Dialog.Title)`
   font-size: 14px;
   font-weight: bold;
   text-align: center;
-  color: rgb(252 159 48);
+  color: #D4A843;
   margin: 0;
 `;
 
@@ -47,7 +47,7 @@ const DialogClose = styled(Dialog.Close)`
   font-size: 12px;
   font-weight: bold;
   text-align: center;
-  background-color: rgb(252 159 48);
+  background-color: #D4A843;
   color: black;
   padding: 8px;
   border-radius: 8px;
@@ -66,7 +66,7 @@ const Input = styled.input`
   outline: 0px;
 
   &:focus {
-    box-shadow: 0px 0px 2px 2px rgb(252 159 48);
+    box-shadow: 0px 0px 2px 2px #D4A843;
   }
 `;
 
@@ -79,7 +79,7 @@ const Select = styled.select`
   border: 0px;
   outline: 0px;
   &:focus {
-    box-shadow: 0px 0px 2px 2px rgb(252 159 48);
+    box-shadow: 0px 0px 2px 2px #D4A843;
   }
 `;
 

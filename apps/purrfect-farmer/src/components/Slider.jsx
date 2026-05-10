@@ -20,13 +20,13 @@ const Slider = forwardRef(
       >
         <SliderPrimitive.Track
           className={cn(
-            "relative h-2 bg-blue-200 rounded-full grow",
+            "relative h-2 bg-nile-gold-200 rounded-full grow",
             trackClassName
           )}
         >
           <SliderPrimitive.Range
             className={cn(
-              "absolute h-full bg-blue-500 rounded-full",
+              "absolute h-full bg-nile-gold-500 rounded-full",
               rangeClassName
             )}
           />
@@ -37,7 +37,7 @@ const Slider = forwardRef(
             className={cn(
               "relative size-6 rounded-full",
               "flex items-center justify-center text-xs",
-              "bg-blue-500 shadow-xs",
+              "bg-nile-gold-500 shadow-xs",
               "border-4 border-white",
               "focus:outline-hidden",
               thumbClassName

@@ -154,7 +154,7 @@ export default function ATFAutoMasterSetup() {
                           type="button"
                           onClick={generatePhrase}
                           className={cn(
-                            "text-blue-500 dark:text-blue-400",
+                            "text-nile-gold-500 dark:text-nile-gold-400",
                             "cursor-pointer hover:underline disabled:opacity-50",
                             "flex items-center gap-1",
                           )}
@@ -171,7 +171,7 @@ export default function ATFAutoMasterSetup() {
 
               {/* Address */}
               {address && (
-                <p className="text-center text-blue-500 wrap-break-word">
+                <p className="text-center text-nile-gold-500 wrap-break-word">
                   {address}
                 </p>
               )}
@@ -191,7 +191,7 @@ export default function ATFAutoMasterSetup() {
                     <button
                       type="button"
                       onClick={() => openTelegramLink("https://t.me/toncenter")}
-                      className="text-xs text-blue-500 dark:text-blue-400 hover:underline cursor-pointer"
+                      className="text-xs text-nile-gold-500 dark:text-nile-gold-400 hover:underline cursor-pointer"
                     >
                       Get API key from @toncenter
                     </button>

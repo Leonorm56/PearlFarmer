@@ -53,7 +53,7 @@ export const TerminalFarmerContent = () => {
             className={cn(
               "flex items-center justify-center gap-2 p-2 w-10 shrink-0",
               "hover:bg-neutral-100 dark:hover:bg-neutral-800",
-              "text-blue-500",
+              "text-nile-gold-500",
             )}
           >
             <HiOutlineWrenchScrewdriver className="size-5" />

@@ -80,7 +80,7 @@ export default memo(function TelegramLinkForm({ link, handleFormSubmit }) {
         <button
           type="submit"
           className={cn(
-            "px-4 py-2 bg-blue-500 text-white rounded-lg",
+            "px-4 py-2 bg-nile-gold-500 text-white rounded-lg",
             "disabled:opacity-50"
           )}
           disabled={form.formState.isSubmitting}

@@ -22,7 +22,7 @@ export default function CloudCenteredDialog({
             "w-full max-w-sm",
             "my-auto overflow-hidden",
             "flex flex-col gap-2 p-4",
-            "border bg-white dark:bg-neutral-900 rounded-xl",
+            "border bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl rounded-xl",
             props.className
           )}
         >

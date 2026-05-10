@@ -66,7 +66,7 @@ const Button = styled(BaseButton)`
 
   &:hover,
   &.active {
-    background-color: oklch(0.78 0.16 64.67);
+    background-color: #D4A843;
     color: black;
   }
 `;

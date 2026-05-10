@@ -6,7 +6,7 @@ const ConnectLink = ({ title, ...props }) => (
     {...props}
     target="_blank"
     className={cn(
-      "px-4 py-2 hover:bg-blue-500 hover:text-white",
+      "px-4 py-2 hover:bg-nile-gold-500 hover:text-white",
       props.className
     )}
   >
@@ -21,7 +21,7 @@ export default memo(function Connect(props) {
         className={cn(
           "grid grid-cols-3 rounded-full overflow-hidden",
           "text-center",
-          "border bg-neutral-100 dark:bg-neutral-800",
+          "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
           "divide-x dark:divide-neutral-600",
           "font-turret-road font-bold"
         )}
@@ -45,6 +45,5 @@ export default memo(function Connect(props) {
     </div>
   );
 });
-
 
 

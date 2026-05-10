@@ -27,7 +27,7 @@ export default memo(function CloudOptionsGroup({
       >
         <span className="flex flex-col">
           <span>Enable Cloud</span>
-          <span className="text-blue-400">(Access Required)</span>
+          <span className="text-nile-gold-400">(Access Required)</span>
         </span>
       </LabelToggle>
 

@@ -24,7 +24,7 @@ export default memo(function AppUpdate() {
       as={"a"}
       href={import.meta.env.VITE_APP_RELEASE_PAGE_URL}
       target="_blank"
-      className="bg-blue-600 rounded-none text-center"
+      className="bg-nile-gold-600 rounded-none text-center"
     >
       🎉 Update to Latest Version - {latestVersion}
     </PrimaryButton>

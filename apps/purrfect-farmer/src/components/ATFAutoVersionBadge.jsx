@@ -8,7 +8,7 @@ export default function ATFAutoVersionBadge({ version }) {
         "text-xs font-mono font-bold",
         isV4
           ? "text-purple-500 dark:text-purple-300"
-          : "text-blue-500 dark:text-blue-300",
+          : "text-nile-gold-500 dark:text-nile-gold-300",
       )}
     >
       {isV4 ? "V4R2" : "W5"}

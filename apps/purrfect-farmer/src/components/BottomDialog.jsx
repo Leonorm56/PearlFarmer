@@ -9,7 +9,7 @@ function BottomDialogContainer(props) {
       <Dialog.Content
         {...props}
         className={cn(
-          "border bg-white dark:bg-neutral-900",
+          "border shadow-sm bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl",
           "fixed z-50 inset-x-0 bottom-0 h-5/6 rounded-t-xl",
           "flex flex-col",
           props.className,
@@ -36,7 +36,7 @@ function BottomDialog({
 
             <div className="flex flex-col text-center">
               {/* Title */}
-              <Dialog.Title className="text-xl font-bold font-turret-road text-blue-400 text-center">
+              <Dialog.Title className="text-xl font-bold font-turret-road text-nile-gold-400 text-center">
                 {title}
               </Dialog.Title>
 
@@ -52,7 +52,7 @@ function BottomDialog({
         <Container className="flex flex-col p-4 font-bold shrink-0">
           <Dialog.Close
             onClick={onCloseButtonClick}
-            className="p-2.5 text-white bg-blue-500 rounded-lg"
+            className="p-2.5 text-white bg-nile-gold-500 rounded-lg"
           >
             Close
           </Dialog.Close>
@@ -65,6 +65,5 @@ function BottomDialog({
 BottomDialog.Container = BottomDialogContainer;
 
 export default BottomDialog;
-
 
 

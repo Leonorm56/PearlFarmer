@@ -24,7 +24,7 @@ function ToolButton({ icon: Icon, children, ...props }) {
     <Dialog.Close
       {...props}
       className={cn(
-        "border bg-neutral-100 dark:bg-neutral-800",
+        "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
         "flex items-center gap-2.5 p-2.5 cursor-pointer rounded-xl",
         "text-left",
       )}
@@ -53,6 +53,5 @@ const BottomDialogTools = Object.assign(
 );
 
 export default BottomDialogTools;
-
 
 

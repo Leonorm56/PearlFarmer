@@ -55,7 +55,7 @@ const AccountChooserItem = memo(function AccountChooserItem({
     <label
       className={cn(
         "flex items-center gap-2 p-2 rounded-xl",
-        "border bg-neutral-100 dark:bg-neutral-800",
+        "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
         "cursor-pointer",
         disabled && "opacity-60",
       )}
@@ -84,7 +84,7 @@ const AccountChooserItem = memo(function AccountChooserItem({
             {account.title}
           </h3>
           {/* Address */}
-          <div className="flex items-center gap-1.5 text-blue-800 dark:text-blue-100">
+          <div className="flex items-center gap-1.5 text-nile-gold-800 dark:text-nile-gold-100">
             <ATFAutoAddress address={account.address} />
             <ATFAutoVersionBadge version={account.version} />
           </div>
@@ -164,6 +164,5 @@ export default function ATFAutoAccountsChooser({
     </div>
   );
 }
-
 
 

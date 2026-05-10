@@ -27,7 +27,7 @@ export default memo(function Donate() {
         )}
       >
         <Dialog.Content
-          className="flex flex-col w-full max-w-sm gap-2 p-4 border bg-white dark:bg-neutral-900 rounded-xl"
+          className="flex flex-col w-full max-w-sm gap-2 p-4 border bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl rounded-xl"
           onOpenAutoFocus={(ev) => ev.preventDefault()}
         >
           {/* Title */}
@@ -50,7 +50,7 @@ export default memo(function Donate() {
             {networks.map((network, index) => (
               <div
                 key={index}
-                className="flex flex-col gap-2 p-4 rounded-lg border bg-neutral-100 dark:bg-neutral-800"
+                className="flex flex-col gap-2 p-4 rounded-lg border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md"
               >
                 <div className="flex gap-2">
                   <img src={network.icon} className="w-10 h-10 shrink-0" />
@@ -64,7 +64,7 @@ export default memo(function Donate() {
                     className={cn(
                       "flex items-center justify-center shrink-0",
                       "w-8 h-8 rounded-full",
-                      "border bg-neutral-200 dark:bg-neutral-700"
+                      "border bg-white/80 dark:bg-white/[0.10] backdrop-blur-md"
                     )}
                     onClick={() => {
                       copy(network.address);

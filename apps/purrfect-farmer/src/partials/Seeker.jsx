@@ -37,7 +37,7 @@ export default memo(function Seeker() {
                   key={server.id}
                   role="button"
                   className={cn(
-                    "border bg-neutral-100 dark:bg-neutral-800",
+                    "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
                     "flex items-center gap-2 p-2 px-4 cursor-pointer rounded-xl"
                   )}
                   onClick={() =>
@@ -67,6 +67,5 @@ export default memo(function Seeker() {
     </div>
   );
 });
-
 
 

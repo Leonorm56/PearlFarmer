@@ -64,7 +64,7 @@ export const TerminalFarmerPrompt = ({ context, userInputPrompt }) => {
             answer(value);
             setValue("");
           }}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          className="px-4 py-2 bg-nile-gold-500 text-white rounded-lg hover:bg-nile-gold-600"
         >
           Submit
         </Dialog.Close>

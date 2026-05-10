@@ -57,7 +57,7 @@ export default memo(function ControlArea() {
                 className="flex items-center justify-center w-10 h-10 shrink-0"
                 onClick={() => zoomies.dispatchAndRefresh()}
               >
-                <HiOutlineArrowPath className="w-6 h-6 text-blue-400" />
+                <HiOutlineArrowPath className="w-6 h-6 text-nile-gold-400" />
               </button>
 
               {/* Backward Button */}
@@ -65,7 +65,7 @@ export default memo(function ControlArea() {
                 className="flex items-center justify-center w-10 h-10 shrink-0"
                 onClick={() => zoomies.processPreviousTask()}
               >
-                <HiOutlineBackward className="w-6 h-6 text-blue-400" />
+                <HiOutlineBackward className="w-6 h-6 text-nile-gold-400" />
               </button>
 
               {/* Forward Button */}
@@ -73,7 +73,7 @@ export default memo(function ControlArea() {
                 className="flex items-center justify-center w-10 h-10 shrink-0"
                 onClick={() => zoomies.processNextTask()}
               >
-                <HiOutlineForward className="w-6 h-6 text-blue-400" />
+                <HiOutlineForward className="w-6 h-6 text-nile-gold-400" />
               </button>
 
               {/* Cycles */}
@@ -81,7 +81,7 @@ export default memo(function ControlArea() {
                 className={cn(
                   "shrink-0",
                   "bg-linear-to-br",
-                  "from-red-500 to-purple-500",
+                  "from-nile-gold-500 to-nile-gold-700",
                   "text-white font-bold",
                   "rounded-full",
                   "text-xs",
@@ -109,14 +109,14 @@ export default memo(function ControlArea() {
                   <FaFire
                     className={cn(
                       "w-7 h-7",
-                      zoomies.enabled ? "text-blue-400" : "text-neutral-400"
+                      zoomies.enabled ? "text-nile-gold-400" : "text-neutral-400"
                     )}
                   />
                 ) : (
                   <FaPaw
                     className={cn(
                       "w-7 h-7",
-                      zoomies.enabled ? "text-blue-400" : "text-neutral-400"
+                      zoomies.enabled ? "text-nile-gold-400" : "text-neutral-400"
                     )}
                   />
                 )}
@@ -140,7 +140,7 @@ export default memo(function ControlArea() {
                   className={cn(
                     "flex items-center gap-2 p-2",
                     "rounded-lg cursor-pointer",
-                    "border bg-neutral-900 hover:bg-blue-500"
+                    "border bg-neutral-900 hover:bg-nile-gold-500"
                   )}
                 >
                   <HiOutlineFire className="w-4 h-4" /> Quick Run

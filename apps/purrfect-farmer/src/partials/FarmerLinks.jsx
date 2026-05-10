@@ -60,7 +60,7 @@ const LinkContextItem = (props) => (
     className={cn(
       "flex items-center gap-2 p-2",
       "rounded-lg cursor-pointer",
-      "border bg-neutral-900 hover:bg-blue-500",
+      "border bg-neutral-900 hover:bg-nile-gold-500",
       props.className,
     )}
   />
@@ -72,8 +72,8 @@ const LinkHeaderButton = (props) => (
     className={cn(
       "flex items-center justify-center w-10 h-10",
       "rounded-lg shrink-0",
-      "border bg-blue-100 text-blue-800",
-      "dark:bg-neutral-800 dark:text-blue-200",
+      "border-2 bg-blue-100 text-nile-gold-800",
+      "dark:bg-neutral-800 dark:text-nile-gold-200",
       props.className,
     )}
   />
@@ -209,7 +209,7 @@ export default memo(function FarmerLinks() {
           <Dialog.Title
             className={cn(
               "grow min-w-0",
-              "text-xl font-bold font-turret-road text-blue-400 text-center",
+              "text-xl font-bold font-turret-road text-nile-gold-400 text-center",
             )}
           >
             Telegram Links
@@ -250,7 +250,7 @@ export default memo(function FarmerLinks() {
                           className={cn(
                             "flex items-center",
                             "gap-2 p-2 rounded-lg",
-                            "border bg-neutral-100 dark:bg-neutral-800",
+                            "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
                             "hover:bg-neutral-200 dark:hover:bg-neutral-600",
                             showAsGrid
                               ? "flex-col justify-center"
@@ -271,7 +271,7 @@ export default memo(function FarmerLinks() {
                             link={link}
                             refetch={() => updateLink(link)}
                             className={cn(
-                              "rounded-full shrink-0 bg-neutral-200 dark:bg-neutral-700",
+                              "rounded-full shrink-0 bg-white/80 dark:bg-white/[0.10] backdrop-blur-md",
                               showAsGrid ? "w-10 h-10" : "w-8 h-8",
                             )}
                           />
@@ -381,7 +381,7 @@ export default memo(function FarmerLinks() {
         >
           <Dialog.Content
             className={cn(
-              "border bg-white dark:bg-neutral-900",
+              "border shadow-sm bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl",
               "flex flex-col w-full max-w-sm gap-2 p-4 rounded-xl",
             )}
           >
@@ -421,6 +421,5 @@ export default memo(function FarmerLinks() {
     </BottomDialog.Container>
   );
 });
-
 
 

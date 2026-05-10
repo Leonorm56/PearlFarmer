@@ -20,14 +20,14 @@ export default function CenteredDialog({
           className={cn(
             "my-auto flex flex-col w-full",
             "max-w-sm gap-2 p-4",
-            "border bg-white dark:bg-neutral-900 rounded-xl",
+            "border bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl rounded-xl",
           )}
         >
           {/* Icon */}
           {Icon ? (
-            <Icon className="flex size-10 text-blue-400 mx-auto" />
+            <Icon className="flex size-10 text-nile-gold-400 mx-auto" />
           ) : null}
-          <Dialog.Title className="font-bold text-center text-xl text-blue-400 font-turret-road truncate">
+          <Dialog.Title className="font-bold text-center text-xl text-nile-gold-400 font-turret-road truncate">
             {title}
           </Dialog.Title>
           <Dialog.Description className="sr-only">

@@ -13,7 +13,7 @@ export default memo(function DropButton({ drop, ...props }) {
         className={cn(
           "flex items-center",
           "p-2 relative",
-          "border bg-neutral-100 dark:bg-neutral-800",
+          "border bg-white/70 dark:bg-white/[0.06] backdrop-blur-md shadow-sm",
           "hover:bg-neutral-200 dark:hover:bg-neutral-600",
           showAsGrid
             ? "gap-2 flex-col justify-center rounded-lg"
@@ -58,6 +58,5 @@ export default memo(function DropButton({ drop, ...props }) {
     </div>
   );
 });
-
 
 
