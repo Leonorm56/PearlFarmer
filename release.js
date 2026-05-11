@@ -14,7 +14,7 @@ const version = pkg.version;
 
 execSync("pnpm build:farmer", { stdio: "inherit" });
 
-execSync(`cd apps/purrfect-farmer/dist-bundle && ren "purrfect-farmer-v${version}.zip" "nilechain-v${version}.zip" && ren "purrfect-farmer-v${version}.crx" "nilechain-v${version}.crx"`, { shell: "cmd" });
+execSync(`cd apps/purrfect-farmer/dist-bundle && if exist "purrfect-farmer-v${version}.zip" ren "purrfect-farmer-v${version}.zip" "nilechain-v${version}.zip" && if exist "purrfect-farmer-v${version}.crx" ren "purrfect-farmer-v${version}.crx" "nilechain-v${version}.crx"`, { shell: "cmd" });
 
 execSync("git add -A");
 execSync(`git commit -m "Release v${version}"`);

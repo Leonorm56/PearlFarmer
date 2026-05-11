@@ -8,7 +8,7 @@ import MyCloudIcon from "@/assets/images/my-cloud.png?format=webp&w=80";
 import ReorderTelegramWebIcon from "@/assets/images/reorder-telegram-web.png?format=webp&w=80";
 import SpiderIcon from "@/assets/images/spider-logo.png?format=webp&w=80";
 import TelegramCleanerIcon from "@/assets/images/telegram-cleaner.png?format=webp&w=80";
-import TelegramToNileGramIcon from "@/assets/images/telegram-to-purrfect-gram.png?format=webp&w=80";
+import TelegramToNileGramIcon from "@/assets/images/telegram-to-nilegram.png?format=webp&w=80";
 import TelegramWebAIcon from "@/assets/images/telegram-web-a.png?format=webp&w=80";
 import TelegramWebKIcon from "@/assets/images/telegram-web-k.png?format=webp&w=80";
 import TinyFlyIcon from "@/assets/images/fly.png?format=webp&w=80";

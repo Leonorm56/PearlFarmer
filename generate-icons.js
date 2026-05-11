@@ -23,7 +23,7 @@ for (const size of sizes) {
 await sharp(Buffer.from(generateSVG(512))).png().toFile(`apps/purrfect-farmer/src/assets/images/icon.png`);
 await sharp(Buffer.from(generateSVG(512))).png().toFile(`apps/purrfect-farmer/src/assets/images/nilechain-logo.png`);
 await sharp(Buffer.from(generateSVG(256))).png().toFile(`apps/purrfect-farmer/src/assets/images/nilechain-alert.png`);
-await sharp(Buffer.from(generateSVG(512))).png().toFile(`apps/purrfect-farmer/src/assets/images/purrfect-cat.png`);
+await sharp(Buffer.from(generateSVG(512))).png().toFile(`apps/purrfect-farmer/src/assets/images/nilechain-cat.png`);
 await sharp(Buffer.from(generateSVG(256))).png().toFile(`apps/purrfect-farmer/src/assets/images/shocked-cat.png`);
 
 console.log('All icons generated!');s

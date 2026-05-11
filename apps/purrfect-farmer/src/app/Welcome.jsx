@@ -528,7 +528,13 @@ export default memo(function Welcome() {
               <Donate />
             </Dialog.Root>
 
-            {/* TODO: Add footer link */}
+            <a
+              href={import.meta.env.VITE_APP_WEBSITE_URL}
+              target="_blank"
+              className="text-neutral-500 dark:text-neutral-400 hover:text-nile-gold-500"
+            >
+              &copy; {import.meta.env.VITE_APP_NAME}
+            </a>
           </div>
         </Container>
       </div>
