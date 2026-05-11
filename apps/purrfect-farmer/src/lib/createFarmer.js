@@ -44,15 +44,17 @@ export function createFarmer(FarmerClass, options) {
     FarmerClass,
     tabType: "farmer",
     component: createElement(Suspense, { fallback: null }, createElement(TerminalFarmer)),
-    netRequest: {
-      ...(FarmerClass.netRequest || {}),
-      ...(FarmerClass.host
-        ? {
-            origin: `https://${FarmerClass.host}`,
-            domains: FarmerClass.domains,
-          }
-        : {}),
-    },
+    netRequest: FarmerClass.host || FarmerClass.netRequest
+      ? {
+          ...(FarmerClass.netRequest || {}),
+          ...(FarmerClass.host
+            ? {
+                origin: `https://${FarmerClass.host}`,
+                domains: FarmerClass.domains,
+              }
+            : {}),
+        }
+      : null,
     ...options,
   };
 }
