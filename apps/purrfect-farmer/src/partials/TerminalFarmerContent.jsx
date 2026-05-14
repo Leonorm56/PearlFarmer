@@ -30,7 +30,7 @@ export const TerminalFarmerContent = () => {
 
   /** Balance */
   const { value: balance } = useStorageState(
-    `farmer-storage:${context.id}:adclicker-balance`,
+    `farmer-storage:${context.id}:${context.id}-balance`,
     null,
   );
 

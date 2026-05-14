@@ -347,7 +347,7 @@ export default class BaseFarmer {
       await this.utils.delayForSeconds(5, { signal: this.signal });
 
       /* Execute Callback */
-      await callback();
+      const result = await callback();
 
       /* Log Task Completion */
       this.logger.log(
@@ -355,6 +355,7 @@ export default class BaseFarmer {
           task,
         )}`,
       );
+      return result;
     } catch (error) {
       /* Log Task Error */
       this.logger.log(

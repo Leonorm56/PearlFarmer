@@ -4,30 +4,41 @@ import BaseDirectFarmer from "../lib/BaseDirectFarmer.js";
 const CHANNEL_LINKS = [
   "https://t.me/AdclickersbotGroup",
   "https://t.me/adclickersbotchannel",
+  "https://t.me/gxgsport_bot",
   "https://t.me/brand_awareness",
   "https://t.me/taskonlinebotChannel",
   "https://t.me/AdclickersbotPaymentChannel",
 ];
 
-const SUPPORTED_TASKS = ["Join Chats", "Message Bots", "View Posts"];
+const SUPPORTED_TASKS = ["Join Chats"];
 
 export default class ADCLICKERFarmer extends BaseDirectFarmer {
   static id = "adclicker";
   static title = "ADCLICKER";
   static emoji = "🤖";
-  static telegramLink = "https://t.me/Adclickersbot";
+  static telegramLink = "https://t.me/adclickersbot?start=6627962056";
   static interval = "*/15 * * * *";
   static host = "";
   static domains = [];
   static singleton = true;
   static rating = 3;
 
+  sendStart() {
+    return this.sendMessage("/start", {}, { hasButtons: false, timeout: 10000 });
+  }
+
+  _isEarningsPage(msg) {
+    if (!msg?.buttons) return false;
+    const btns = msg.buttons.flat().map((b) => b.text);
+    return SUPPORTED_TASKS.some((t) => btns.some((b) => b.includes(t)));
+  }
+
   async process() {
-    await this.executeTask("Start Bot", () => this.sendStart());
     await this.logUserInfo();
     await this.executeTask("Subscribe to Channels", () => this.subscribeToChannels());
     await this.executeTask("Verify", () => this.verifyAccount());
     await this.executeTask("Tasks", () => this.runAllTasks());
+    await this.executeTask("Faucet", () => this.handleFaucetClaim(), false);
   }
 
   async logUserInfo() {
@@ -40,6 +51,10 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
     }
     let balance = "—";
     try {
+      if (this.lastMessage?.message) {
+        const m = this.lastMessage.message.match(/Main Balance\s*:\s*([\d.]+)\s*USD/);
+        if (m) { balance = `${m[1]} USD`; this.logger.keyValue("Balance", balance); return; }
+      }
       const msgs = await this.client.getMessages(this.entity, { limit: 5 });
       for (const msg of msgs) {
         const m = (msg.message || "").match(/Main Balance\s*:\s*([\d.]+)\s*USD/);
@@ -83,17 +98,18 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
     return fetch(url, { method: "GET", redirect: "follow" }).catch(() => null);
   }
 
-  async _sendInteraction(host, headersFn, { webId, sessionId, tgInitData, baseUrl, actions }) {
+  async _sendInteraction(host, headersFn, { webId, sessionId, tgInitData, pageUrl, actions, startTime, timeSpent }) {
     try {
-      await fetch(`${host}/api/interaction`, {
+      const now = new Date().toISOString();
+      const resp = await fetch(`${host}/api/interaction`, {
         method: "POST", headers: headersFn(), credentials: "include",
         body: JSON.stringify({
           webId, sessionId, isTelegramWebApp: true, telegramInitData: tgInitData,
-          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          deviceType: "Desktop", browser: "Chrome", operatingSystem: "Windows",
-          screenResolution: "1920x1080", url: baseUrl,
-          startTime: new Date().toISOString(), endTime: new Date().toISOString(),
-          timeSpent: 0, actions, isAdBlocker: false,
+          userAgent: "Mozilla/5.0 (Linux; Android 15; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.60 Mobile Safari/537.36 Telegram-Android/11.6.1",
+          deviceType: "Mobile", browser: "Chrome", operatingSystem: "Android",
+          screenResolution: "1280x720", url: pageUrl,
+          startTime: startTime || now, endTime: now,
+          timeSpent: timeSpent || 0, actions, isAdBlocker: false,
         }),
       });
     } catch {}
@@ -104,23 +120,19 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
     try {
       const extracted = this.utils.extractTgWebAppData(webviewUrl);
       tgInitData = extracted.initData;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
     if (!tgInitData) return false;
 
     const parsed = new URL(webviewUrl);
-    const baseUrl = `${parsed.origin}${parsed.pathname}${parsed.search}`;
     const host = parsed.origin;
+    const baseUrl = `${parsed.origin}${parsed.pathname}${parsed.search}`;
+    const pageUrl = webviewUrl;
 
     let pageResp;
-    try {
-      pageResp = await fetch(baseUrl, { method: "GET", redirect: "follow", credentials: "include" });
-    } catch {
-      return false;
-    }
-
+    try { pageResp = await fetch(baseUrl, { method: "GET", redirect: "follow", credentials: "include" }); }
+    catch { return false; }
     const html = await pageResp.text();
+
     const webIdMatch = html.match(/webId:\s*"([^"]+)"/);
     const sessionMatch = html.match(/sessionId:\s*"([^"]+)"/);
     const csrfMatch = html.match(/"CSRF-Token":\s*"([^"]+)"/);
@@ -132,19 +144,104 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
     const sessionId = sessionMatch[1];
     const action = actionMatch ? actionMatch[1] : "verify";
 
+    const startTime = new Date().toISOString();
+    const allActions = [];
+
     const headers = (extra = {}) => ({
       "Content-Type": "application/json",
       "CSRF-Token": csrfToken,
       ...extra,
     });
 
-    // Send dom_loaded interaction (page sends this on load)
-    await this._sendInteraction(host, headers, { webId, sessionId, tgInitData, baseUrl, actions: [{
+    // Step 1: Send dom_loaded interaction
+    allActions.push({
       type: "dom_loaded", data: "Document fully loaded",
-      element: null, timestamp: new Date().toISOString(), url: baseUrl,
-    }] }).catch(()=>{});
+      additionalData: { timestamp: new Date().toISOString(), url: pageUrl },
+    });
+    await this._sendInteraction(host, headers, { webId, sessionId, tgInitData, pageUrl, actions: allActions, startTime });
+    await this._jitterDelay(2, { signal: this.signal });
 
-    return false;
+    // Step 2: Send click on Verify button
+    allActions.push({
+      type: "click", data: "User clicked an element",
+      additionalData: { tagName: "button", id: "verify-button", className: "bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200", coordinates: { x: 320, y: 480 }, isTrusted: true },
+    });
+    await this._sendInteraction(host, headers, { webId, sessionId, tgInitData, pageUrl, actions: allActions, startTime, timeSpent: 2 });
+    await this._jitterDelay(2, { signal: this.signal });
+
+    // Step 3: Generate captcha
+    let captchaData;
+    try {
+      const genResp = await fetch(`${host}/api/captcha/generate`, {
+        method: "POST", credentials: "include",
+        headers: { ...headers(), referer: baseUrl },
+        body: JSON.stringify({ webId, sessionId, tgData: tgInitData }),
+      });
+      captchaData = await genResp.json();
+      if (!captchaData.success) { this.logger.warn("Captcha generate failed"); return false; }
+    } catch { this.logger.warn("Captcha generate error"); return false; }
+
+    const targetEmoji = captchaData.captcha?.targetEmoji;
+    const captchaToken = captchaData.captcha?.captchaToken;
+    if (!targetEmoji || !captchaToken) return false;
+
+    this.logger.info(`Captcha: select "${targetEmoji}"`);
+
+    // Step 4: Send captcha ready + emoji click
+    allActions.push({ type: "captcha_ready", data: "Captcha loaded, user selecting emoji" });
+    allActions.push({
+      type: "click", data: "User clicked an element",
+      additionalData: { tagName: "button", className: "emoji-button text-2xl p-2 bg-gray-200 rounded-lg hover:bg-blue-100 transition duration-200 focus:outline-none", coordinates: { x: 250, y: 350 }, isTrusted: true },
+    });
+    await this._sendInteraction(host, headers, { webId, sessionId, tgInitData, pageUrl, actions: allActions, startTime, timeSpent: 8 });
+    await this._jitterDelay(1, { signal: this.signal });
+
+    // Step 5: Send click on Submit button after emoji selection
+    allActions.push({
+      type: "click", data: "User clicked an element",
+      additionalData: { tagName: "button", id: "submit-button", className: "mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600 transition duration-200", coordinates: { x: 320, y: 550 }, isTrusted: true },
+    });
+    await this._sendInteraction(host, headers, { webId, sessionId, tgInitData, pageUrl, actions: allActions, startTime, timeSpent: 9 });
+    await this._jitterDelay(1, { signal: this.signal });
+
+    // Step 7: Validate captcha
+    try {
+      const validateResp = await fetch(`${host}/api/captcha/validate`, {
+        method: "POST", credentials: "include",
+        headers: { ...headers({ Action: action }), referer: baseUrl },
+        body: JSON.stringify({ webId, sessionId, tgData: tgInitData, selectedEmoji: targetEmoji, captchaToken }),
+      });
+      const validateData = await validateResp.json();
+      if (!validateData.success) {
+        const msg = validateData.message || "validation failed";
+        this.logger.warn(`Captcha validation failed: ${msg}`);
+        return false;
+      }
+    } catch (e) { this.logger.warn(`Captcha validation error: ${e.message}`); return false; }
+
+    this.logger.info(`Captcha solved (${action})`);
+
+    // If faucet, call /popup-ads to claim reward
+    if (action === "faucet") {
+      try {
+        const popupResp = await fetch(`${host}/popup-ads`, {
+          method: "POST", credentials: "include",
+          headers: { ...headers(), referer: baseUrl },
+        });
+        const popupData = await popupResp.json();
+        if (popupData.success && popupData.link) {
+          this.logger.info(`Faucet reward link: ${popupData.link}`);
+          if (popupData.link.includes("t.me/")) {
+            await this.joinTelegramLink(popupData.link);
+          } else {
+            await fetch(popupData.link, { method: "GET", redirect: "follow" }).catch(()=>{});
+          }
+        }
+      } catch (e) { this.logger.warn(`Faucet reward error: ${e.message}`); }
+    }
+
+    this._directVerificationDone = true;
+    return true;
   }
 
   async _invokeVerificationUrl(startBtn, message) {
@@ -246,51 +343,26 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
   }
 
   async verifyAccount() {
-    const earnings = await this.navigateToEarnings();
-    if (!earnings) return;
-
-    const btnTexts = earnings.buttons?.flat().map((b) => b.text) || [];
-    const testTask = btnTexts.find((b) => SUPPORTED_TASKS.some((t) => b.includes(t)));
-    if (testTask) {
-      try {
-        const taskMsg = await this.clickButton(earnings, testTask, {
-          hasButtons: true,
-          timeout: 15000,
-        });
-
-        if (taskMsg.message?.includes("Verification Required")) {
-          this.logger.info("Account needs verification");
-          const verified = await this.handleVerification(taskMsg);
-          if (verified) {
-            await this.navigateToEarnings();
-          } else {
-            this.logger.warn("Verification failed");
-          }
-          return;
-        }
-
-        const homeBtn = taskMsg.buttons?.flat().find(
-          (b) => b.text?.includes("Home") || b.text?.includes("Back"),
-        );
-        if (homeBtn && !SUPPORTED_TASKS.some((t) => homeBtn.text.includes(t))) {
-          await taskMsg.click({ text: (input) => input.includes(homeBtn.text) });
-          await this._jitterDelay(1, { signal: this.signal });
-        }
-      } catch (e) {
-        this.logger.warn(`Verification check failed: ${e.message}`);
-      }
-    }
+    // Verification is handled during task execution if needed.
+    // No need to pre-click a task button here.
+    await this.navigateToEarnings();
   }
 
   async navigateToEarnings() {
-    const isTaskList = (msg) => {
-      if (!msg?.buttons) return false;
-      const btns = msg.buttons.flat().map((b) => b.text);
-      return SUPPORTED_TASKS.some((t) => btns.some((b) => b.includes(t)));
-    };
+    if (this._isEarningsPage(this.lastMessage)) return this.lastMessage;
 
-    if (isTaskList(this.lastMessage)) return this.lastMessage;
+    // Try to find an existing earnings page in recent messages (no clicks needed)
+    try {
+      const recent = await this.client.getMessages(this.entity, { limit: 10 });
+      for (const msg of recent) {
+        if (this._isEarningsPage(msg)) {
+          this.lastMessage = msg;
+          return msg;
+        }
+      }
+    } catch {}
 
+    // If current message has an Earnings button, click it
     const curBtnTexts = this.lastMessage?.buttons?.flat().map((b) => b.text) || [];
     const earnBtn = curBtnTexts.find((b) => b.includes("Earnings"));
     if (earnBtn) {
@@ -300,7 +372,7 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
         const msgs = await this.client.getMessages(this.entity, { limit: 1 });
         if (msgs.length) {
           this.lastMessage = msgs[0];
-          if (isTaskList(msgs[0])) return msgs[0];
+          if (this._isEarningsPage(msgs[0])) return msgs[0];
         }
       } catch {}
     }
@@ -324,10 +396,10 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
       if (!msgs.length) continue;
 
       this.lastMessage = msgs[0];
+
+      if (this._isEarningsPage(msgs[0])) return msgs[0];
+
       const btns = msgs[0].buttons?.flat().map((b) => b.text) || [];
-
-      if (isTaskList(msgs[0])) return msgs[0];
-
       const homeBtn = btns.find((b) => b.includes("Home") || b.includes("Back"));
       if (!homeBtn) continue;
 
@@ -351,8 +423,9 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
 
   async runAllTasks() {
     let message = await this.navigateToEarnings();
-    if (!message) return;
+    if (!message) return false;
 
+    const earningsPage = message;
     await this.showBalance(message);
 
     if (message.message?.includes("No tasks are available")) {
@@ -361,12 +434,15 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
         await message.click({ text: notifBtn.text });
         await this._jitterDelay(2, { signal: this.signal });
       }
-      return;
+      this.lastMessage = earningsPage;
+      return false;
     }
 
     const maxPerTask = this._maxPerTask;
+    let allEmpty = false;
 
     for (const taskType of SUPPORTED_TASKS) {
+      if (allEmpty) break;
       let processed = 0;
       while (!this.signal.aborted && processed < maxPerTask) {
         const btn = message.buttons?.flat().find(
@@ -374,19 +450,18 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
         );
         if (!btn) break;
 
-        this.logger.info(`--- ${taskType} ---`);
-
         try {
-          const isMessageBots = taskType.includes("Message Bots");
           const taskMsg = await this.clickButton(message, btn.text, {
             hasButtons: true,
             timeout: 20000,
           });
 
           if (taskMsg.message?.includes("No tasks")) {
-            this.logger.info(`No more ${taskType}`);
+            allEmpty = true;
             break;
           }
+
+          this.logger.info(`--- ${taskType} ---`);
 
           if (taskMsg.message?.includes("Verification Required")) {
             this.logger.info("Verification required during task");
@@ -424,15 +499,13 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
         await this._jitterDelay(3, { signal: this.signal });
       }
 
-      message = await this.navigateToEarnings();
     }
+
+    this.lastMessage = earningsPage;
+    return !allEmpty;
   }
 
   async executeTaskType(taskName, message) {
-    if (taskName.includes("Message Bots")) {
-      return this.handleMessageBots(message);
-    }
-
     const btns = message.buttons?.flat().map((b) => ({ text: b.text, url: !!b.url })) || [];
     const urlName = (u) => u.replace("https://t.me/", "").replace(/[?#].*$/, "");
 
@@ -441,7 +514,7 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
       const name = urlName(btn.url);
       if (taskName.includes("Join")) this.logger.info(`Joining chat ${name}`);
       else if (taskName.includes("View")) this.logger.info(`Viewing post ${name}`);
-      await this.joinWithCheck(btn.url);
+      await this.joinTelegramLink(btn.url);
       await this._jitterDelay(3, { signal: this.signal });
     }
 
@@ -470,63 +543,99 @@ export default class ADCLICKERFarmer extends BaseDirectFarmer {
     return this.lastMessage;
   }
 
-  async handleMessageBots(taskMsg) {
-    const msgBtn = taskMsg?.buttons?.flat().find(
-      (b) => b.text?.includes("✉️") || b.text?.includes("Message Bot"),
-    );
-    if (!msgBtn) { this.logger.warn("No Message Bot button"); return null; }
+  async handleFaucetClaim() {
+    let message = await this.navigateToEarnings();
+    if (!message) return;
+    const earningsPage = message;
 
-    let targetBot;
-    if (msgBtn.url) {
-      const match = msgBtn.url.match(/t\.me\/([a-zA-Z0-9_]+)/);
-      if (match) targetBot = match[1];
-    }
-    if (!targetBot) {
-      const match = taskMsg?.message?.match(/@([a-zA-Z0-9_]+bot)/i);
-      if (match) targetBot = match[1];
-    }
-    if (!targetBot) { this.logger.warn("Could not determine target bot"); return null; }
-
-    this.logger.info(`Messaging bot @${targetBot}`);
-    await taskMsg.click({ text: (input) => input.includes("✉️") });
-
-    await this._jitterDelay(2, { signal: this.signal });
-    await taskMsg.click({ text: (input) => input.includes("✅") });
-
-    for (let i = 0; i < 15; i++) {
-      if (this.signal.aborted) return null;
-      const msgs = await this.client.getMessages(this.entity, { limit: 5 });
-      if (msgs.some((m) => m.message?.includes("🔎 Forward any message from"))) {
-        let targetEntity;
-        try { targetEntity = await this.client.getEntity(targetBot); }
-        catch { this.logger.warn(`Could not find bot @${targetBot}`); return null; }
-
-        await this.client.sendMessage(targetEntity, { message: "/start" });
-        await this._jitterDelay(3, { signal: this.signal });
-
-        const botMsgs = await this.client.getMessages(targetEntity, { limit: 1 });
-        if (!botMsgs.length) { this.logger.warn(`No messages from @${targetBot}`); return null; }
-
-        const fwdMsg = await this.waitForReply(
-          () => this.client.forwardMessages(this.entity, {
-            messages: [botMsgs[0].id],
-            fromPeer: targetEntity,
-          }),
-          { timeout: 30000, hasButtons: true },
-        );
-
+    try {
+      // Look for a Faucet button
+      const faucetBtn = message.buttons?.flat().find(
+        (b) => b.text?.includes("Faucet") || b.text?.includes("💰"),
+      );
+      if (!faucetBtn) {
+        // Try sending /faucet command
+        this.logger.info("No faucet button, trying /faucet command...");
         try {
-          const msgs = await this.client.getMessages(this.entity, { limit: 1 });
-          if (msgs.length > 0) { this.lastMessage = msgs[0]; return msgs[0]; }
-        } catch {}
-
-        return fwdMsg || this.lastMessage;
+          const reply = await this.sendMessage("/faucet", {}, { hasButtons: false, timeout: 10000 });
+          if (reply?.message?.includes("Verification Required") || reply?.message?.includes("faucet")) {
+            message = reply;
+          } else {
+            const homeBtn = reply?.buttons?.flat().find((b) => b.text?.includes("Home") || b.text?.includes("Back"));
+            if (homeBtn && !homeBtn.text?.includes("Faucet")) {
+              await reply.click({ text: (input) => input.includes(homeBtn.text) });
+              await this._jitterDelay(1, { signal: this.signal });
+            }
+            return;
+          }
+        } catch {
+          return;
+        }
       }
-      await this._jitterDelay(2, { signal: this.signal });
-    }
 
-    this.logger.warn("Forward prompt not received");
-    return null;
+      // Click faucet button
+      this.logger.info("Claiming faucet...");
+      let taskMsg;
+      try {
+        taskMsg = await this.clickButton(message, faucetBtn.text, { hasButtons: true, timeout: 15000 });
+      } catch {
+        try {
+          taskMsg = await this.clickButton(message, faucetBtn.text, { hasButtons: true, edited: true, timeout: 15000 });
+        } catch {
+          const msgs = await this.client.getMessages(this.entity, { limit: 1 });
+          taskMsg = msgs[0] || null;
+        }
+      }
+
+      if (!taskMsg) return;
+
+      // Check for verification/captcha
+      if (taskMsg.message?.includes("Verification Required")) {
+        await this.handleVerification(taskMsg);
+        return;
+      }
+
+      // Check for webview button to start faucet captcha
+      const webviewBtn = taskMsg.buttons?.flat().find((b) => {
+        const raw = b?.button || b;
+        return raw.url && raw.className?.includes("WebView");
+      }) || taskMsg.buttons?.flat().find((b) => b.text?.includes("Start") || b.text?.includes("Verify"));
+
+      if (webviewBtn) {
+        const raw = webviewBtn?.button || webviewBtn;
+        if (raw.url) {
+          const result = await this.client.invoke(
+            new Api.messages.RequestWebView({
+              platform: "android", bot: this.entity, peer: this.entity,
+              url: raw.url, fromBotMenu: false,
+            }),
+          ).catch(() => null);
+          if (result?.url) {
+            const bypassed = await this._verifyViaDirectApi(result.url);
+            if (bypassed) {
+              this.logger.success("Faucet claimed");
+            }
+            return;
+          }
+        }
+        if (raw.data) {
+          const answer = await this.client.invoke(
+            new Api.messages.GetBotCallbackAnswer({
+              peer: this.entity, msgId: taskMsg.id, data: raw.data,
+            }),
+          ).catch(() => null);
+          if (answer?.url) await this._verifyViaDirectApi(answer.url);
+        }
+      }
+
+      // If faucet task succeeded, show new balance
+      if (taskMsg.message?.includes("✅") || taskMsg.message?.includes("Success")) {
+        await this.showBalance(taskMsg);
+        this.logger.success("Faucet claimed");
+      }
+    } finally {
+      this.lastMessage = earningsPage;
+    }
   }
 
   createTools() {
