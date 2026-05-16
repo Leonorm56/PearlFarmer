@@ -1,6 +1,6 @@
 {
   "name": "nilechain",
-  "version": "1.0.34",
+  "version": "1.0.36",
   "description": "Telegram Mini-Apps automation tool.",
   "private": false,
   "type": "module",
