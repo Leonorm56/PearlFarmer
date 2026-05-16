@@ -1,0 +1,30 @@
+{
+  "name": "nilechain",
+  "version": "1.0.36",
+  "description": "Telegram Mini-Apps automation tool.",
+  "private": false,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo \"No build script defined.\"",
+    "test": "echo \"No tests specified.\""
+  },
+  "files": [
+    "dist-extension",
+    "extension",
+    "assets",
+    "manifest.json",
+    "rule_resources"
+  ],
+  "keywords": [
+    "telegram",
+    "automation",
+    "extension"
+  ],
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Leonorm56/NileChain.git"
+  },
+  "author": "Leonorm56"
+}
