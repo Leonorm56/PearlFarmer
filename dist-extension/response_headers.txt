@@ -1,0 +1,20 @@
+HTTP/1.1 200 OK
+Date: Wed, 13 May 2026 09:30:53 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Server: cloudflare
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+X-Powered-By: Express
+Access-Control-Allow-Origin: https://www.adclickersbot.com
+Vary: Origin
+vary: accept-encoding
+Access-Control-Allow-Credentials: true
+set-cookie: webId=s%3A6a04449bab0c7f727e376e43.vdCRwL2sm1Onom2BlHIIOF%2FKlPwU3fvmC4IwHAt8h5w; Max-Age=2592000; Path=/; Expires=Fri, 12 Jun 2026 09:30:53 GMT; HttpOnly; Secure; SameSite=Strict
+set-cookie: _csrf=SdyoPACuNW4uErFk6WkoQ_lK; Path=/; HttpOnly; Secure; SameSite=Strict
+Speculation-Rules: "/cdn-cgi/speculation"
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=jpTivk11W1SlihmwVs3Uqi%2FLn21i4ciybAf2HGNq5oJpXrFtM0zijTraVLqdS8vLjLnCFLXQ2rqh%2BvXTit%2Be1n%2FHHYrFEm5Du1WqXKyg1wnaJO9l9jg%2F2pS7RZqdTigdbqPIIVNzL64%3D"}]}
+cf-cache-status: DYNAMIC
+CF-RAY: 9fb0a5a26c39c5f8-NBO
+alt-svc: h3=":443"; ma=86400
+

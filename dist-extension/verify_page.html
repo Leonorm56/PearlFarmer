@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    Complete Verification
+  </title>
+  <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  
+
+      <style>
+        @keyframes gradientMove {
+          0% {
+            background-position: 0% 50%;
+          }
+
+          50% {
+            background-position: 100% 50%;
+          }
+
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
+        .bg-animated {
+          background: linear-gradient(270deg, #2c3e50, #34495e, #16a085);
+          background-size: 400% 400%;
+          animation: gradientMove 12s ease infinite;
+        }
+
+        @keyframes blink {
+
+          0%,
+          50% {
+            color: red;
+          }
+
+          100% {
+            color: transparent;
+          }
+        }
+
+        .last-seconds {
+          animation: blink 1s infinite;
+        }
+
+        .fade {
+          transition: opacity 0.5s ease;
+        }
+
+        .hidden {
+          display: none;
+        }
+      </style>
+</head>
+
+<body class="bg-animated flex items-center justify-center h-screen">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-center">
+    <div id="waiting-screen" class="fade">
+      
+        <p class="text-lg font-semibold mb-4">
+          🔓 Click below to start your verification.
+        </p>
+        
+
+            <!-- add aads here too -->
+            <div class="mb-4">
+              <div style="width: 125px; margin: auto; z-index: 99998; height: auto">
+                <iframe data-aa="2404318" src="//ad.a-ads.com/2404318/?size=125x125" style="
+                border: 0;
+                padding: 0;
+                width: 125px;
+                height: 125px;
+                overflow: hidden;
+                display: block;
+                margin: auto;
+              "></iframe>
+                <div style="
+                width: 125px;
+                margin: auto;
+                position: absolute;
+                left: 0;
+                right: 0;
+              ">
+                  <a target="_blank" style="
+                  display: inline-block;
+                  font-size: 13px;
+                  color: #263238;
+                  padding: 4px 10px;
+                  background: #f8f8f9;
+                  text-decoration: none;
+                  border-radius: 0 0 4px 4px;
+                " id="frame-link"
+                    href="https://aads.com/campaigns/new/?source_id=2404318&source_type=ad_unit&partner=2404318">Advertise
+                    here</a>
+                </div>
+              </div>
+            </div>
+
+            <button id="verify-button"
+              class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200">
+              Verify
+            </button>
+    </div>
+
+    <div id="captcha-container" class="hidden fade">
+      <div class="mb-4">
+        <p>
+          Select the correct emoji:
+          <span id="target-emoji" class="text-xl text-blue-500 font-bold"></span>
+        </p>
+      </div>
+      <div class="grid grid-cols-4 gap-4 mb-4"></div>
+      <div id="timer" class="text-red-500 font-bold mb-4 hidden" aria-live="polite"></div>
+      <div id="message-box" class="mb-4 hidden"></div>
+
+      <div class="flex items-center justify-center mb-4">
+        <div id="frame" style="width: 125px; margin: auto; z-index: 99998; height: auto">
+          <iframe data-aa="2404318" src="//ad.a-ads.com/2404318/?size=125x125" style="
+                border: 0;
+                padding: 0;
+                width: 125px;
+                height: 125px;
+                overflow: hidden;
+                display: block;
+                margin: auto;
+              "></iframe>
+          <div style="
+                width: 125px;
+                margin: auto;
+                position: absolute;
+                left: 0;
+                right: 0;
+              ">
+            <a target="_blank" style="
+                  display: inline-block;
+                  font-size: 13px;
+                  color: #263238;
+                  padding: 4px 10px;
+                  background: #f8f8f9;
+                  text-decoration: none;
+                  border-radius: 0 0 4px 4px;
+                " id="frame-link"
+              href="https://aads.com/campaigns/new/?source_id=2404318&source_type=ad_unit&partner=2404318">Advertise
+              here</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="submit-button"
+        class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600 transition duration-200"
+        disabled>
+        Submit
+      </button>
+      <button id="retry-button" class="hidden mt-2 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+        Retry
+      </button>
+    </div>
+  </div>
+
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+  </div>
+
+  
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LVPHEL9V3B"></script>
+<script nonce="uFqBk8jvjw6/HddDjy0HGg==">
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LVPHEL9V3B');
+</script>
+
+<script nonce="uFqBk8jvjw6/HddDjy0HGg==">
+  document.addEventListener("DOMContentLoaded", async () => {
+    const webId = "U2FsdGVkX1+7cONzNqxR+vXwrAOBJh0D+klN4eSFaNrKjSEbYObTJXaSEZI828LY";
+    const csrfToken = "a7AU1viP-3JhHND_dkQHwylhjWHcW1plyN3Y";
+    const sessionId = "5119023f907df1941457d144edf8cfca";
+    const isTelegramWebApp = !!window?.Telegram?.WebApp?.initData;
+    const initData = isTelegramWebApp ? window.Telegram.WebApp.initData : null;
+
+    const interactionData = {
+      webId,
+      sessionId,
+      isTelegramWebApp,
+      telegramInitData: initData,
+      userAgent: navigator.userAgent,
+      deviceType: getDeviceType(),
+      browser: detectBrowser(),
+      operatingSystem: detectOS(),
+      screenResolution: `${window.screen.width}x${window.screen.height}`,
+      url: window.location.href,
+      startTime: new Date().toISOString(),
+      endTime: null,
+      timeSpent: 0,
+      actions: [],
+      isAdBlocker: false,
+    };
+
+    // Detect adblocker once at the start
+    interactionData.isAdBlocker = await detectAdBlocker();
+
+    let lastLogTime = Date.now();
+    let queue = [];
+    let flushTimeout = null;
+
+    queue.push({
+      type: "dom_loaded",
+      data: "Document fully loaded",
+      additionalData: {
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+      },
+    });
+
+    if (isTelegramWebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.onEvent("deactivated", () =>
+        queue.push({
+          type: "deactivated",
+          data: "User closed web_app",
+        })
+      );
+      Telegram.WebApp.onEvent("activated", () =>
+        queue.push({
+          type: "activated",
+          data: "User reopened web_app",
+        })
+      );
+    }
+
+    document.addEventListener("click", (event) => {
+      queue.push({
+        type: "click",
+        data: "User clicked an element",
+        additionalData: {
+          tagName: event.target.tagName.toLowerCase(),
+          id: event.target.id || null,
+          className: event.target.className || null,
+          coordinates: { x: event.clientX, y: event.clientY },
+          isTrusted: event.isTrusted,
+        },
+      });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      queue.push({
+        type: "visibility_change",
+        data: `Document visibility changed to ${document.visibilityState}`,
+        additionalData: {
+          visibilityState: document.visibilityState,
+        },
+      });
+    });
+
+    setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      const now = Date.now();
+      interactionData.timeSpent += Math.floor((now - lastLogTime) / 1000);
+      lastLogTime = now;
+    }, 2000);
+
+    window.addEventListener("beforeunload", () => {
+      interactionData.endTime = new Date().toISOString();
+      const payload = {
+        ...interactionData,
+        actions: queue,
+      };
+
+      sendData()
+    });
+
+    function sendData() {
+      interactionData.endTime = new Date().toISOString();
+      const payload = {
+        ...interactionData,
+        actions: queue,
+      };
+
+      fetch("/api/interaction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify(payload),
+        credentials: "same-origin",
+        keepalive: true,
+      })
+        .then((res) => {
+          if (!res.ok) {
+            console.error("Failed to send interaction data:");
+          } else {
+            console.log("Interaction data sent successfully:");
+          }
+        })
+        .catch((err) => {
+          console.error("Error sending interaction data:");
+        });
+    }
+
+    setInterval(() => {
+      sendData();
+    }, 500);
+
+    function getDeviceType() {
+      return /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop";
+    }
+
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.includes("Edg")) return "Edge";
+      if (ua.includes("OPR") || ua.includes("Opera")) return "Opera";
+      if (ua.includes("Brave")) return "Brave";
+      if (ua.includes("Vivaldi")) return "Vivaldi";
+      if (ua.includes("Chrome")) return "Chrome";
+      if (ua.includes("Firefox")) return "Firefox";
+      if (ua.includes("Safari")) return "Safari";
+      return "Unknown";
+    }
+
+    function detectOS() {
+      const ua = navigator.userAgent;
+      if (ua.includes("Windows")) return "Windows";
+      if (ua.includes("Macintosh")) return "macOS";
+      if (ua.includes("Android")) return "Android";
+      if (/iPhone|iPad|iPod/.test(ua)) return "iOS";
+      if (ua.includes("Linux")) return "Linux";
+      return "Unknown";
+    }
+
+    async function detectAdBlocker() {
+      return new Promise((resolve) => {
+        let detected = false;
+        const bait = document.createElement("div");
+        bait.className = "adsbox";
+        bait.style.cssText =
+          "width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;visibility:hidden;";
+        document.body.appendChild(bait);
+
+        setTimeout(() => {
+          if (
+            bait.offsetHeight === 0 ||
+            bait.offsetParent === null ||
+            getComputedStyle(bait).display === "none"
+          ) {
+            detected = true;
+          }
+          document.body.removeChild(bait);
+
+          const adUrl =
+            "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 1000);
+
+          fetch(adUrl, {
+            method: "HEAD",
+            mode: "no-cors",
+            signal: controller.signal,
+          })
+            .then(() => {
+              clearTimeout(timeout);
+              resolve(detected); // still respect first test
+            })
+            .catch(() => {
+              clearTimeout(timeout);
+              resolve(true); // blocked
+            });
+        }, 200);
+      });
+    }
+  });
+</script>
+ <script nonce="uFqBk8jvjw6/HddDjy0HGg==">
+    document.addEventListener("DOMContentLoaded", () => {
+        window.Telegram.WebApp.ready();
+        const isTelegramWebApp = !!window?.Telegram?.WebApp?.initData;
+
+        if (!isTelegramWebApp) {
+            document.body.innerHTML = `
+                  <div class="bg-red-100 p-4 rounded text-center">
+                      <p class="text-red-700 font-semibold">Please open this app inside Telegram for proper functionality.</p>
+                  </div>
+              `;
+            return;
+        }
+    })
+</script>
+
+
+
+      <script nonce="uFqBk8jvjw6/HddDjy0HGg==">
+        (() => {
+          const flags = {
+            devtools: false,
+            functionOverride: false,
+            visibilityAbuse: false,
+            fastForward: false,
+            headless: false,
+          };
+
+          // DevTools detection
+          setInterval(() => {
+            const t = performance.now();
+            debugger;
+            if (performance.now() - t > 120) flags.devtools = true;
+          }, 2000);
+
+          // Protect ad functions from override
+          const protect = (name) => {
+            if (!window[name]) return;
+            let fn = window[name];
+            Object.defineProperty(window, name, {
+              configurable: false,
+              get: () => fn,
+              set: () => (flags.functionOverride = true),
+            });
+          };
+
+          ["show_9719150", "showAdexora", "showGiga"].forEach(protect);
+
+          // Visibility abuse
+          let hideCount = 0;
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) hideCount++;
+            if (hideCount > 3) flags.visibilityAbuse = true;
+          });
+
+          // Timer / sleep abuse
+          let last = Date.now();
+          setInterval(() => {
+            const now = Date.now();
+            if (now - last > 6000) flags.fastForward = true;
+            last = now;
+          }, 1000);
+
+          // Headless check
+          if (navigator.webdriver) flags.headless = true;
+
+          Object.defineProperty(window, "__antiTamper__", {
+            value: Object.freeze(flags),
+            writable: false,
+          });
+        })();
+      </script>
+
+      <script nonce="uFqBk8jvjw6/HddDjy0HGg==">
+        document.addEventListener("DOMContentLoaded", async () => {
+          let adsSeen = false;
+          const action = "verify";
+          const tg = window.Telegram.WebApp;
+          tg.ready();
+
+          const waitingScreen = document.getElementById("waiting-screen");
+          const verifyButton = document.getElementById("verify-button");
+          const captchaContainer = document.getElementById("captcha-container");
+          const targetEmojiElement = document.getElementById("target-emoji");
+          const emojiGrid = document.querySelector(".grid");
+          const timerDisplay = document.getElementById("timer");
+          const messageBox = document.getElementById("message-box");
+          const submitButton = document.getElementById("submit-button");
+          const retryButton = document.getElementById("retry-button");
+          const loadingOverlay = document.getElementById("loading-overlay");
+
+          let emojiList = [],
+            selectedEmoji = null,
+            timerInterval = null,
+            captchaToken = null;
+
+          const showLoading = () => loadingOverlay.classList.remove("hidden");
+          const hideLoading = () => loadingOverlay.classList.add("hidden");
+
+          const showMessage = (msg, type = "info") => {
+            messageBox.textContent = msg;
+            messageBox.className = `mb-4 px-4 py-2 rounded ${type === "success"
+              ? "bg-green-100 text-green-700"
+              : type === "error"
+                ? "bg-red-100 text-red-700"
+                : "bg-blue-100 text-blue-700"
+              }`;
+            messageBox.classList.remove("hidden");
+          };
+
+          const clearMessage = () => {
+            messageBox.classList.add("hidden");
+            messageBox.textContent = "";
+          };
+
+          const fetchCaptcha = async () => {
+            showLoading();
+            clearMessage();
+            await new Promise((r) => setTimeout(r, 1000));
+            try {
+              const res = await fetch("/api/captcha/generate", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                  "CSRF-Token": "a7AU1viP-3JhHND_dkQHwylhjWHcW1plyN3Y",
+                },
+                body: JSON.stringify({
+                  webId: "U2FsdGVkX1+7cONzNqxR+vXwrAOBJh0D+klN4eSFaNrKjSEbYObTJXaSEZI828LY",
+                  sessionId: "5119023f907df1941457d144edf8cfca",
+                  tgData: tg.initData,
+                }),
+              });
+              const data = await res.json();
+              if (!data.success) throw new Error(data.message || "Captcha error");
+              emojiList = data.captcha.shuffledEmojis;
+              captchaToken = data.captcha.captchaToken;
+              targetEmojiElement.textContent = data.captcha.targetEmoji;
+              renderEmojiButtons();
+              startTimer();
+            } catch (e) {
+              showMessage("Failed to load captcha.", "error");
+              retryButton.classList.remove("hidden");
+            } finally {
+              hideLoading();
+            }
+          };
+
+          const renderEmojiButtons = () => {
+            emojiGrid.innerHTML = "";
+            emojiList.forEach((emoji) => {
+              const btn = document.createElement("button");
+              btn.className =
+                "emoji-button text-2xl p-2 bg-gray-200 rounded-lg hover:bg-blue-100 transition duration-200 focus:outline-none";
+              btn.textContent = emoji;
+              btn.addEventListener("click", () => selectEmoji(btn, emoji));
+              emojiGrid.appendChild(btn);
+            });
+          };
+
+          const selectEmoji = (button, emoji) => {
+            document
+              .querySelectorAll(".emoji-button")
+              .forEach((btn) =>
+                btn.classList.remove("bg-blue-100", "border", "border-blue-500")
+              );
+            button.classList.add("bg-blue-100", "border", "border-blue-500");
+            selectedEmoji = emoji;
+            submitButton.disabled = false;
+            clearMessage();
+          };
+
+          const startTimer = () => {
+            let timeLeft = 15;
+            updateTimerText(timeLeft);
+            timerDisplay.classList.remove("hidden");
+            timerInterval = setInterval(() => {
+              timeLeft--;
+              if (document.visibilityState === "hidden") timeLeft = 15;
+              updateTimerText(timeLeft);
+              if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                disableCaptcha();
+                retryButton.classList.remove("hidden");
+                timerDisplay.classList.add("hidden");
+                showMessage("Time’s up! Try again.", "error");
+              }
+            }, 1000);
+          };
+
+          const updateTimerText = (t) => {
+            if (t > 5) {
+              timerDisplay.textContent = `⏳ Hurry up! Only ${t}s left.`;
+              timerDisplay.classList.remove("last-seconds");
+            } else if (t > 0) {
+              timerDisplay.textContent = `⚠️ Time’s almost up! ${t}s left.`;
+              timerDisplay.classList.add("last-seconds");
+            } else {
+              timerDisplay.textContent = "❌ Time’s up!";
+              timerDisplay.classList.remove("last-seconds");
+            }
+          };
+
+          const disableCaptcha = () => {
+            document.querySelectorAll(".emoji-button").forEach((btn) => {
+              btn.disabled = true;
+              btn.classList.add("cursor-not-allowed", "opacity-50");
+            });
+            submitButton.disabled = true;
+          };
+
+          const isTampered = () =>
+            Object.values(window.__antiTamper__ || {}).some(Boolean);
+
+          const validateCaptcha = async () => {
+            if (!adsSeen) {
+              showMessage("❌ Please watch the ad before submitting.", "error");
+              retryCaptcha();
+              return;
+            }
+
+            if (isTampered()) {
+              showMessage("⚠️ Security check failed", "error");
+              tg.close();
+              return;
+            }
+
+            showLoading();
+            await new Promise((r) => setTimeout(r, 1000));
+            try {
+              const res = await fetch("/api/captcha/validate", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                  "CSRF-Token": "a7AU1viP-3JhHND_dkQHwylhjWHcW1plyN3Y",
+                  Action: "verify",
+                },
+                body: JSON.stringify({
+                  webId: "U2FsdGVkX1+7cONzNqxR+vXwrAOBJh0D+klN4eSFaNrKjSEbYObTJXaSEZI828LY",
+                  sessionId: "5119023f907df1941457d144edf8cfca",
+                  tgData: tg.initData,
+                  selectedEmoji,
+                  captchaToken,
+                }),
+              });
+              const data = await res.json();
+              console.log("Captcha validation response:", data);
+              if (data.success) {
+                disableCaptcha();
+                timerDisplay.classList.add("hidden");
+                showMessage("✅ Your account has been successfully verified!", "success");
+                if (action === "faucet") {
+                  fetch("/popup-ads", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "CSRF-Token": "a7AU1viP-3JhHND_dkQHwylhjWHcW1plyN3Y",
+                    },
+                  })
+                    .then((r) => r.json())
+                    .then((d) => {
+                      if (d.success && d.link) {
+                        if (d.link.includes("t.me/")) tg.openTelegramLink(d.link);
+                        else tg.openLink(d.link, { try_instant_view: false });
+                      }
+                    })
+                    .catch((e) => console.error("Popup ad error:", e));
+                }
+                setTimeout(() => tg.close(), 1000);
+              } else {
+                disableCaptcha();
+                timerDisplay.classList.add("hidden");
+                showMessage("❌ Incorrect emoji. Try again!", "error");
+                retryButton.classList.remove("hidden");
+              }
+            } catch (e) {
+              showMessage("❌ Something went wrong. Try again.", "error");
+            } finally {
+              hideLoading();
+            }
+          };
+
+          const retryCaptcha = () => {
+            clearInterval(timerInterval);
+            selectedEmoji = null;
+            submitButton.disabled = true;
+            timerDisplay.classList.remove("last-seconds");
+            retryButton.classList.add("hidden");
+            clearMessage();
+            emojiGrid.innerHTML = "";
+            fetchCaptcha();
+          };
+
+          retryButton.addEventListener("click", retryCaptcha);
+          submitButton.addEventListener("click", () => {
+            clearInterval(timerInterval);
+            validateCaptcha();
+          });
+
+          // ✅ Fixed Adexora + GigaPub + Monetag faucet ads
+          verifyButton.addEventListener("click", async () => {
+            try {
+              if (action === "faucet") {
+                showMessage("⏳ Loading a short ad...", "info");
+                if (window.adRunning) return;
+                window.adRunning = true;
+
+                const adNetworks = ["adexora", "gigapub", "monetag"];
+                const randomChoice =
+                  adNetworks[Math.floor(Math.random() * adNetworks.length)];
+
+                const showAd = (network) => {
+                  if (network === "adexora") window.showAdexora();
+                  else if (network === "gigapub") window.showGiga();
+                  else show_9719150({ type: "pop", ymid: "5119023f907df1941457d144edf8cfca" });
+                };
+
+                const fallbackOrder = ["monetag", "gigapub", "adexora"].filter(
+                  (n) => n !== randomChoice
+                );
+                let success = false;
+
+                try {
+                  showAd(randomChoice);
+                  success = true;
+                } catch (err) {
+                  showAd(fallbackOrder[0]);
+                  success = true;
+                } 
+
+                if (success) {
+                  adsSeen = true;
+                  waitingScreen.classList.add("hidden");
+                  captchaContainer.classList.remove("hidden");
+                  await fetchCaptcha();
+                } else
+                  showMessage(
+                    "⚠️ All ad networks failed. Try again later.",
+                    "error"
+                  );
+
+                window.adRunning = false;
+              } else {
+                adsSeen = true;
+                waitingScreen.classList.add("hidden");
+                captchaContainer.classList.remove("hidden");
+                await fetchCaptcha();
+              }
+            } catch (e) {
+              window.adRunning = false;
+              console.error("Ad loading error:", e);
+              showMessage(
+                "Ad failed or blocked. Please disable ad blocker or try again.",
+                "error"
+              );
+              window.location.reload();
+            }
+          });
+        });
+      </script>
+
+      
+</body>
+
+</html>
