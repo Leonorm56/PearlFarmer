@@ -57,6 +57,28 @@ export default class DreamcoinProFarmer extends BaseFarmer {
       .then((r) => r.data);
   }
 
+  getStoreCharacters(signal) {
+    return this.api
+      .get("https://api.dreamcoin.pro/api/characters/store", { signal })
+      .then((r) => r.data)
+      .catch(() => null);
+  }
+
+  getAllCharacters(signal) {
+    return this.api
+      .get("https://api.dreamcoin.pro/api/characters/all", { signal })
+      .then((r) => r.data)
+      .catch(() => null);
+  }
+
+  discoverCharacters(signal) {
+    // POST /api/characters/store returns the full store catalog when authenticated
+    return this.api
+      .post("https://api.dreamcoin.pro/api/characters/store", null, { signal })
+      .then((r) => r.data)
+      .catch(() => null);
+  }
+
   getMining(signal) {
     return this.api
       .get("https://api.dreamcoin.pro/api/mining", { signal })
@@ -112,7 +134,7 @@ export default class DreamcoinProFarmer extends BaseFarmer {
   claimTask(id, payload, signal) {
     return this.api.post(
       `https://api.dreamcoin.pro/api/tasks/${id}/claim`,
-      payload,
+      payload || null,
       { signal },
     );
   }
@@ -222,14 +244,13 @@ export default class DreamcoinProFarmer extends BaseFarmer {
 
     this._logUserInfo(balance, characters, mining);
 
+    await this.executeTask("Mining", () => this._completeMining(mining));
     await this.executeTask("Check In", () => this._checkIn(dailyBonus));
     await this.executeTask("Fortune Wheel", () => this._spinRaffle(balance));
     await this.executeTask("Referral Bonus", () => this._claimReferralBonus());
     await this.executeTask("Characters", () =>
       this._purchaseCharacters(balance, characters),
     );
-    await this.executeTask("Mining", () => this._completeMining(mining));
-    await this.executeTask("Tasks", () => this._completeTasks());
   }
 
   _logUserInfo(balance, characters, mining) {
@@ -244,9 +265,9 @@ export default class DreamcoinProFarmer extends BaseFarmer {
       const totalEarns = own.reduce((s, c) => s + (c.character?.earns_usdt || 0), 0);
       this.logger.keyValue(
         "Characters",
-        `${own.length} owned ($${totalEarns}/day)`,
+        `${own.length} owned ($${totalEarns}/4HOURS)`,
       );
-      if (active) this.logger.keyValue("Active", `${active.name} ($${active.earns_usdt || 0}/day)`);
+      if (active) this.logger.keyValue("Active", `${active.name} ($${active.earns_usdt || 0}/4HOURS)`);
     }
     if (mining) {
       this.logger.keyValue("Mining", mining.mining?.status || "idle");
@@ -258,19 +279,74 @@ export default class DreamcoinProFarmer extends BaseFarmer {
 
   async _checkIn(dailyBonus) {
     if (!dailyBonus) return;
-    const day = dailyBonus.tasks?.find(
-      (t) =>
-        t.status === "NOT_STARTED" &&
-        t.details?.current_day &&
-        this.validateTelegramTask(t.details.promote_link),
-    );
-    if (!day) return;
+    const tasks = dailyBonus.tasks || [];
+    if (tasks.length === 0) return;
+
     await this.visitPage("/");
-    await this.tryToJoinTelegramLink(day.details.promote_link);
-    await this.claimTask(day.id, {
-      details: { validation_type: "subscription", partner_id: day.details.partner_id },
-    });
-    this.logger.success(`Checked in day ${day.details.current_day}`);
+    let claimedMain = false;
+
+    for (const task of tasks) {
+      if (this.signal.aborted) break;
+      const status = task.status;
+      const partner = task.partner;
+      const details = task.details || {};
+      const isMain = details?.current_day != null;
+      const name = isMain ? `Day ${details.current_day}` : `Sponsor ${partner?.name || task.id}`;
+
+      if (status === "DONE") continue;
+
+      if (status === "NOT_STARTED" || status === "STARTED") {
+        if (partner?.link && this.validateTelegramTask(partner.link)) {
+          await this.joinTelegramLink(partner.link);
+          await this.utils.delayForSeconds(2, { signal: this.signal });
+        }
+        if (isMain && details.promote_link && this.validateTelegramTask(details.promote_link)) {
+          await this.joinTelegramLink(details.promote_link);
+          await this.utils.delayForSeconds(2, { signal: this.signal });
+        }
+        try {
+          const payload = partner?.id
+            ? { details: { validation_type: "subscription", partner_id: partner.id } }
+            : (isMain && details.partner_id
+              ? { details: { validation_type: "subscription", partner_id: details.partner_id } }
+              : null);
+          await this.claimTask(task.id, payload);
+          if (isMain) {
+            this.logger.success(`Checked in ${name}`);
+            claimedMain = true;
+          } else {
+            this.logger.success(`Completed sponsor: ${partner?.name || task.id}`);
+          }
+        } catch (e) {
+          const code = e.response?.status;
+          if (code === 404) {
+            this.logger.info(`Skipped ${name} (stale)`);
+          } else if (code === 400) {
+            this.logger.info(`Skipped ${name} (unclaimable)`);
+          } else {
+            this.logger.warn(`${name}: ${e.response?.data?.message || e.message}`);
+          }
+        }
+      }
+      await this.utils.delayForSeconds(1, { signal: this.signal });
+    }
+
+    if (!claimedMain) {
+      // Check if all sponsor tasks are done but main is still locked
+      const allDone = tasks.every((t) => t.status === "DONE" || t.details?.current_day != null);
+      const notStarted = tasks.find((t) => t.status === "NOT_STARTED" && !t.partner);
+      if (allDone && notStarted) {
+        try {
+          const payload = notStarted.details?.partner_id
+            ? { details: { validation_type: "subscription", partner_id: notStarted.details.partner_id } }
+            : null;
+          await this.claimTask(notStarted.id, payload);
+          this.logger.success(`Checked in Day ${notStarted.details?.current_day || notStarted.id}`);
+        } catch (e) {
+          this.logger.warn(`Main task: ${e.response?.data?.message || e.message}`);
+        }
+      }
+    }
   }
 
   // ---- Fortune Wheel ----
@@ -315,23 +391,56 @@ export default class DreamcoinProFarmer extends BaseFarmer {
 
   async _purchaseCharacters(balance, characters) {
     if (!characters || !balance) return;
-    const available = (characters.available_characters || []).filter(
-      (c) => c.price_currency === "DC" && c.price <= balance.dc,
-    );
-    if (available.length > 0) {
-      for (const c of available) {
-        this.logger.info(`Buyable: ${c.name} — DC ${c.price}, earns $${c.earns_usdt || 0}/day`);
-      }
-      const item = this.utils.randomItem(available);
-      try {
-        await this.buyCharacter(item.id);
-        await this.setCharacter(item.id);
-        this.logger.success(`Bought & equipped ${item.name} (DC ${item.price})`);
+    const allAvailable = characters.available_characters || [];
+    const owned = characters.owned_characters || [];
+    const ownedIds = new Set(owned.map((o) => o.character?.id).filter(Boolean));
+
+    // Buy free characters first (e.g. Mr. Beast)
+    const free = allAvailable.filter((c) => c.price <= 0 && !ownedIds.has(c.id));
+    if (free.length > 0) {
+      const item = free[0];
+      const bought = await this.buyCharacter(item.id).then(() => true).catch(() => false);
+      if (bought) {
+        await this.setCharacter(item.id).catch(() => {});
+        this.logger.success(`Bought & equipped ${item.name} (DC 0, $${item.earns_usdt || 0}/4HOURS)`);
         return;
-      } catch {
-        this.logger.warn(`Failed to buy ${item.name}`);
       }
     }
+
+    // Buy strategy: prefer big card (500), small card (150) only if saving for big
+    const SMALL = 150;
+    const BIG = 500;
+    const RESERVE = 400;
+    const { dc } = balance;
+
+    const paid = allAvailable.filter(
+      (c) => c.price_currency === "DC" && c.price > 0 && !ownedIds.has(c.id),
+    );
+    if (paid.length === 0) {
+      await this._setActiveCharacter(characters);
+      return;
+    }
+
+    let target = null;
+    if (dc >= BIG) {
+      target = paid.find((c) => c.price === BIG) || paid.sort((a, b) => b.price - a.price)[0];
+    } else if (dc >= SMALL && dc < RESERVE) {
+      target = paid.find((c) => c.price === SMALL) || paid.sort((a, b) => b.price - a.price)[0];
+    }
+
+    if (!target) {
+      await this._setActiveCharacter(characters);
+      return;
+    }
+
+    try {
+      await this.buyCharacter(target.id);
+      await this.setCharacter(target.id);
+      this.logger.success(`Bought & equipped ${target.name} (DC ${target.price}, $${target.earns_usdt || 0}/4HOURS)`);
+    } catch {
+      this.logger.warn(`Failed to buy ${target.name}`);
+    }
+
     await this._setActiveCharacter(characters);
   }
 
@@ -339,7 +448,7 @@ export default class DreamcoinProFarmer extends BaseFarmer {
     const owned = characters.owned_characters || [];
     for (const oc of owned) {
       if (oc.character) {
-        this.logger.info(`Owned: ${oc.character.name} — earns $${oc.character.earns_usdt || 0}/day${oc.is_active ? " [ACTIVE]" : ""}`);
+        this.logger.info(`Owned: ${oc.character.name} — $${oc.character.earns_usdt || 0}/4HOURS${oc.is_active ? " [ACTIVE]" : ""}`);
       }
     }
     const best = owned
@@ -348,7 +457,7 @@ export default class DreamcoinProFarmer extends BaseFarmer {
     if (best && !best.is_active) {
       try {
         await this.setCharacter(best.character.id);
-        this.logger.success(`Equipped ${best.character.name} ($${best.character.earns_usdt || 0}/day)`);
+        this.logger.success(`Equipped ${best.character.name}`);
       } catch {
         this.logger.warn("Failed to set active character");
       }
@@ -361,25 +470,14 @@ export default class DreamcoinProFarmer extends BaseFarmer {
     if (!mining?.mining) return;
     const { status, id } = mining.mining;
 
-    // "end" = mining finished, rewards ready to claim — boost with "claim" to collect, delete, then restart
-    // "claim" = same as end but needs explicit claim action — boost with "claim", delete, then restart
     if (status === "end" || status === "claim") {
-      await this._boostMining(mining, "claim");
+      await this._boostMining(mining, "claim").catch(() => {});
       await this.deleteMining(id).catch(() => {});
       this.logger.success("Mining claimed");
       await this.startMining().catch(() => {});
       this.logger.info("Mining restarted");
     } else {
-      const lastBoost = mining.last_boost_time;
-      const shouldBoost =
-        !lastBoost ||
-        this.utils.dateFns.isBefore(
-          new Date(lastBoost + "Z"),
-          this.utils.dateFns.subMinutes(new Date(), 3),
-        );
-      if (shouldBoost) {
-        await this._boostMining(mining);
-      }
+      await this._boostMining(mining).catch(() => {});
     }
   }
 
@@ -412,7 +510,12 @@ export default class DreamcoinProFarmer extends BaseFarmer {
       /* widget optional */
     }
 
-    await this.boostWithProvider(mining.mining.id, provider, action);
+    try {
+      await this.boostWithProvider(mining.mining.id, provider, action);
+      this.logger.log(`Boosted mining (${provider})`);
+    } catch {
+      this.logger.info("Boost not available");
+    }
   }
 
   // ---- Tasks ----
@@ -446,29 +549,38 @@ export default class DreamcoinProFarmer extends BaseFarmer {
           const status = task.status;
           const partner = task.partner;
           const details = task.details || {};
-          const name = partner?.name || (details?.current_day ? `Day ${details.current_day}` : `Task ${task.id}`);
+          const name = partner?.name || (details?.current_day != null ? `Day ${details.current_day}` : `Task ${task.id}`);
 
           this.logger.info(`[${status}] ${name}`);
 
-          if (status === "NOT_STARTED") {
-            const payload = partner?.id ? { details: { validation_type: "subscription", partner_id: partner.id } } : {};
-            if (partner?.link) {
+          if (status === "DONE" || status === "CLAIMED") {
+            continue;
+          } else if (status === "NOT_STARTED") {
+            const payload = partner?.id ? { details: { validation_type: "subscription", partner_id: partner.id } } : null;
+            if (payload && partner?.link) {
               if (this.validateTelegramTask(partner.link)) {
-                await this.tryToJoinTelegramLink(partner.link);
+                await this.joinTelegramLink(partner.link);
                 await this.utils.delayForSeconds(2, { signal: this.signal });
               }
             }
             await this.claimTask(task.id, payload);
             this.logger.success(`Completed: ${name}`);
           } else if (status === "STARTED") {
-            const payload = partner?.id ? { details: { partner_id: partner.id } } : {};
+            const payload = partner?.id ? { details: { partner_id: partner.id } } : null;
             await this.claimTask(task.id, payload);
             this.logger.success(`Claimed: ${name}`);
           } else {
             this.logger.info(`Skipped ${status}: ${name}`);
           }
         } catch (e) {
-          this.logger.warn(`${name}: ${e.response?.data?.message || e.message}`);
+          const code = e.response?.status;
+          if (code === 404) {
+            this.logger.info(`Skipped (stale)`);
+          } else if (code === 400) {
+            this.logger.info(`Skipped (unclaimable)`);
+          } else {
+            this.logger.warn(`${name}: ${e.response?.data?.message || e.message}`);
+          }
         }
         await this.utils.delayForSeconds(1, { signal: this.signal });
       }

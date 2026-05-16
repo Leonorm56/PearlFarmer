@@ -4,7 +4,7 @@ import UtilsPanel from "@/partials/UtilsPanel";
 import useAppContext from "@/hooks/useAppContext";
 import { ContextMenu } from "radix-ui";
 import { Dialog } from "radix-ui";
-import { FaFire, FaPaw } from "react-icons/fa6";
+import { FaFire } from "react-icons/fa6";
 import {
   HiOutlineArrowPath,
   HiOutlineBackward,
@@ -113,10 +113,11 @@ export default memo(function ControlArea() {
                     )}
                   />
                 ) : (
-                  <FaPaw
+                  <img
+                    src={AppIcon}
                     className={cn(
                       "w-7 h-7",
-                      zoomies.enabled ? "text-nile-gold-400" : "text-neutral-400"
+                      zoomies.enabled ? "opacity-100" : "opacity-40"
                     )}
                   />
                 )}

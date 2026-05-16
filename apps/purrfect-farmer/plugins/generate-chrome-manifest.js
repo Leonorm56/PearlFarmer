@@ -71,10 +71,10 @@ export function generateChromeManifest(env, pkg) {
         description: namePrefix + env.VITE_APP_DESCRIPTION,
         version: pkg.version,
         icons: {
-          16: "icon-16.png",
-          32: "icon-32.png",
-          48: "icon-48.png",
-          128: "icon-128.png",
+          16: "nile-icon-16.png",
+          32: "nile-icon-32.png",
+          48: "nile-icon-48.png",
+          128: "nile-icon-128.png",
         },
         permissions: [
           "tabs",
@@ -104,7 +104,12 @@ export function generateChromeManifest(env, pkg) {
                 type: "module",
               },
               action: {
-                default_icon: "icon-48.png",
+                default_icon: {
+                  16: "nile-icon-16.png",
+                  32: "nile-icon-32.png",
+                  48: "nile-icon-48.png",
+                  128: "nile-icon-128.png",
+                },
                 default_title: namePrefix + `Open ${env.VITE_APP_NAME}`,
                 default_popup: isBridge ? "pwa-iframe.html" : "index.html",
               },
