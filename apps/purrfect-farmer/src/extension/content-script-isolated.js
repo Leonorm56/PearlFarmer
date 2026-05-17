@@ -87,8 +87,12 @@ if (!TELEGRAM_WEB_HOSTS.includes(location.host)) {
     });
   }
 
+  let _initialized = false;
+
   /** Initialize */
   function initialize() {
+    if (_initialized) return;
+    _initialized = true;
     customLogger("Initializing Telegram Mini-App Integration...");
 
     /** Connect to Messaging */
@@ -194,11 +198,29 @@ if (!TELEGRAM_WEB_HOSTS.includes(location.host)) {
           });
         }
       } catch (e) {}
-    }, 3000);
+    }, 1000);
+
+    /** Listen for commands from farmer (via bridge) and forward to game */
+    port.onMessage.addListener((message) => {
+      if (message.type === 'spacejump-command') {
+        const { action, value } = message;
+        // Primary: postMessage to main world IIFE
+        window.postMessage({ type: 'spacejump:command', action, value }, '*');
+        // Fallback: write to localStorage (main world polls sj_cmd every 2s)
+        try {
+          localStorage.setItem('sj_cmd', JSON.stringify({ action, value }));
+        } catch (e) {}
+        console.log('[SpaceJump] Command forwarded:', action, value);
+      }
+    });
   }
 
-  /** Watch Mini-App */
-  watchTelegramMiniApp(initialize);
+  /** SpaceJump: initialize bridge immediately (no Telegram dependency) */
+  if (location.host.endsWith('mywebapp.ru') && location.pathname.startsWith('/SpaceJump')) {
+    initialize();
+  } else {
+    watchTelegramMiniApp(initialize);
+  }
 }
 
 

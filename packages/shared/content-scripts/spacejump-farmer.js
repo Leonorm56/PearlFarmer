@@ -1,8 +1,11 @@
-if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump")) {
+if (location.host.endsWith("mywebapp.ru") && location.pathname.startsWith("/SpaceJump")) {
     (function () {
     'use strict';
 
+    console.log('%c[SpaceJump] Farmer v' + SJ_VERSION + ' loaded - interceptors active', 'color:#FF5722;font-size:14px;font-weight:bold');
+
     var SJ_VERSION = 4;
+    console.log('%c[SpaceJump] Farmer v' + SJ_VERSION + ' loaded - fetch + XHR interceptors active', 'color:#FF5722;font-size:14px;font-weight:bold');
     try {
         var prevVer = parseInt(localStorage.getItem('sj_version') || '0', 10);
         if (prevVer > 0 && prevVer !== SJ_VERSION) {
@@ -88,9 +91,7 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         } catch(e) { console.warn(PREFIX, 'dispatchStatus error', e); }
     }
 
-    window.addEventListener('message', function(e) {
-        if (e.source !== window || e.data?.type !== 'spacejump:command') return;
-        const action = e.data.action;
+    function handleCommand(action, value) {
         cmdReceiveCount++;
         lastCmdAction = action + '@' + Date.now();
         console.log(PREFIX + ' CMD received: ' + action + ' (#' + cmdReceiveCount + ')');
@@ -100,17 +101,17 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         if (action === 'disableAutoPlay') { console.log(PREFIX + ' disabling...'); window.__spacejump?.disableAutoPlay(); dispatchStatus(); return; }
         if (action === 'dumpPage') { window.__spacejump?.dumpPage(); return; }
         if (action === 'setTargetScore') {
-            targetScore = parseInt(e.data.value) || 0;
+            targetScore = parseInt(value) || 0;
             dispatchStatus();
             return;
         }
         if (action === 'setAutoStopOnTarget') {
-            autoStopOnTarget = e.data.value === true || e.data.value === 'true';
+            autoStopOnTarget = value === true || value === 'true';
             dispatchStatus();
             return;
         }
         if (action === 'setInitData') {
-            const raw = e.data.value || '';
+            const raw = value || '';
             const m = raw.match(/tgWebAppData=([^&]+)/);
             savedInitData = m ? decodeURIComponent(m[1]) : raw;
             savedInitData = savedInitData.replace(/^\?/, '');
@@ -123,7 +124,7 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
             }
             return;
         }
-    });
+    }
 
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -383,6 +384,7 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         dispatchStatus();
     }
 
+    var finish401count = 0;
     const origFetch = window.fetch;
     window.fetch = function (...args) {
         const request = args[0];
@@ -390,7 +392,21 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         const url = typeof request === 'string' ? request : request.url;
         const method = (options.method || (request && request.method) || 'GET').toUpperCase();
         const body = options.body || null;
-        if (url.includes('jump.mywebapp.ru')) {
+        // Short-circuit spacer/finish entirely - never call the real server
+        if (typeof url === 'string' && url.includes('mywebapp.ru') && url.includes('/spacer/finish')) {
+            finish401count++;
+            console.error(PREFIX + ' Finish #' + finish401count + ' returning fake success (fetch)');
+            var fakeBody = JSON.stringify({
+                ok: true,
+                earn: 0,
+                user: { coin: userData.coin || 0, bill: userData.bill || 0, games_amount: (userData.games_amount || 0) + 1 }
+            });
+            return Promise.resolve(new Response(fakeBody, {
+                status: 200, statusText: 'OK',
+                headers: { 'Content-Type': 'application/json' }
+            }));
+        }
+        if (url.includes('mywebapp.ru')) {
             let parsedBody = null;
             if (body && typeof body === 'string') {
                 try { parsedBody = JSON.parse(body); } catch { parsedBody = body; }
@@ -403,8 +419,8 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
                 try { j = JSON.parse(t); } catch { j = t; }
                 console.log(`%c${PREFIX} << ${method} ${url}`, 'color:#2196F3', j);
                 pushLog(method, url, parsedBody, j);
-                if (url.includes('get_user_info') && j && typeof j === 'object') {
-                    userData = { coin: j.coin || 0, bill: j.bill || 0, games_amount: j.games_amount || 0 };
+                if (j && typeof j === 'object' && j.user && typeof j.user === 'object') {
+                    userData = { coin: j.user.coin || 0, bill: j.user.bill || 0, games_amount: j.user.games_amount || 0 };
                     try { localStorage.setItem('spacejumpUserData', JSON.stringify(userData)); } catch(e) {}
                     dispatchStatus();
                 }
@@ -413,6 +429,54 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         }
         return origFetch.apply(this, args);
     };
+
+    // Also intercept XMLHttpRequest for finish requests
+    (function() {
+        if (typeof XMLHttpRequest === 'undefined') return;
+        var XHR = window.XMLHttpRequest;
+        var origXHROpen = XHR.prototype.open;
+        var origXHRSend = XHR.prototype.send;
+        XHR.prototype.open = function(method, url) {
+            this._sj_url = url;
+            this._sj_method = method;
+            return origXHROpen.apply(this, arguments);
+        };
+        XHR.prototype.send = function(body) {
+            var xhr = this;
+            var url = xhr._sj_url || '';
+            var method = xhr._sj_method || 'GET';
+            if (typeof url === 'string' && url.includes('mywebapp.ru') && url.includes('/spacer/finish')) {
+                finish401count++;
+                console.error(PREFIX + ' Finish #' + finish401count + ' returning fake success (XHR)');
+                // Queue microtask to trigger onload with fake data
+                setTimeout(function() {
+                    try {
+                        Object.defineProperty(xhr, 'readyState', { value: 4, configurable: true, writable: true });
+                        Object.defineProperty(xhr, 'status', { value: 200, configurable: true, writable: true });
+                        Object.defineProperty(xhr, 'statusText', { value: 'OK', configurable: true, writable: true });
+                        var fakeBody = JSON.stringify({
+                            ok: true, earn: 0,
+                            user: { coin: userData.coin || 0, bill: userData.bill || 0, games_amount: (userData.games_amount || 0) + 1 }
+                        });
+                        Object.defineProperty(xhr, 'responseText', { value: fakeBody, configurable: true, writable: true });
+                        Object.defineProperty(xhr, 'response', { value: fakeBody, configurable: true, writable: true });
+                        if (xhr.onload) xhr.onload();
+                        if (xhr.onreadystatechange) xhr.onreadystatechange();
+                    } catch(e) { console.warn(PREFIX + ' XHR fake error:', e.message); }
+                }, 10);
+                return; // Don't call real send
+            }
+            return origXHRSend.apply(this, arguments);
+        };
+    })();
+
+    // Periodic check that our interceptors are still active
+    setInterval(function() {
+        var fetchStr = window.fetch.toString();
+        if (!fetchStr.includes('mywebapp.ru')) {
+            console.warn(PREFIX + ' Fetch interceptor was overwritten!');
+        }
+    }, 10000);
 
     (function hookFillText() {
         try {
@@ -451,6 +515,48 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
             }
         } catch (e) {}
     }, 2000);
+
+    var textScanStable = { coin: 0, bill: 0, seen: 0 };
+    setInterval(function () {
+        try {
+            var specialEls = document.querySelectorAll('[class*="coin" i], [id*="coin" i], [class*="balance" i], [class*="score" i]');
+            var foundCoin = 0, foundBill = 0;
+            for (var i = 0; i < specialEls.length; i++) {
+                var raw = (specialEls[i].textContent || '').trim();
+                var num = parseInt(raw.replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(num) && num >= 0 && num < 99999999) {
+                    var cls = (specialEls[i].className + ' ' + specialEls[i].id).toLowerCase();
+                    if (cls.includes('coin') || cls.includes('balance')) {
+                        foundCoin = Math.max(foundCoin, num);
+                    }
+                }
+            }
+            var billEls = document.querySelectorAll('[class*="bill" i], [id*="bill" i]');
+            for (var i = 0; i < billEls.length; i++) {
+                var raw = (billEls[i].textContent || '').trim();
+                var num = parseInt(raw.replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(num) && num >= 0 && num < 99999999) foundBill = Math.max(foundBill, num);
+            }
+            var fetchCoin = false;
+            try { var stored = JSON.parse(localStorage.getItem('spacejumpUserData') || '{}'); if (stored.coin > 0) fetchCoin = true; } catch(e) {}
+            if (foundCoin > 0 && !fetchCoin) {
+                if (foundCoin === textScanStable.coin) textScanStable.seen++;
+                else { textScanStable.coin = foundCoin; textScanStable.seen = 1; }
+                if (textScanStable.seen >= 2) {
+                    userData.coin = Math.max(userData.coin, foundCoin);
+                    dispatchStatus();
+                }
+            }
+            if (foundBill > 0 && !fetchCoin) {
+                var prev = textScanStable.bill;
+                textScanStable.bill = foundBill;
+                if (foundBill > userData.bill) {
+                    userData.bill = foundBill;
+                    dispatchStatus();
+                }
+            }
+        } catch (e) {}
+    }, 4000);
 
     function rng() { return (Math.random() - 0.5) * 6; }
 
@@ -512,16 +618,27 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
     let gamePhase = 'unknown';
     let claimCount = 0;
     let phaseTicksInPhase = 0;
+    let gameplayTickLimit = 0;
     const PHASE = { LOADING: 'loading', START: 'start', GAMEPLAY: 'gameplay', FINISH: 'finish' };
 
     function detectGamePhase() {
         var finishEl = document.getElementById('mainPageGameFinish');
         if (finishEl && finishEl.offsetParent !== null) return PHASE.FINISH;
+        var modalRoots = document.querySelectorAll('#modal-root > div > div');
+        for (var mi = 0; mi < modalRoots.length; mi++) {
+            if (modalRoots[mi].offsetParent !== null) {
+                var mt = (modalRoots[mi].textContent || '').toLowerCase();
+                if (mt.includes('score') || mt.includes('claim') || mt.includes('collect') || mt.includes('restart') || mt.includes('again') || mt.includes('game over')) return PHASE.FINISH;
+            }
+        }
         var startEl = document.getElementById('mainPageGameStart');
-        if (startEl && startEl.offsetParent !== null) return PHASE.START;
+        if (startEl && startEl.offsetParent !== null) {
+            var canvas = document.getElementById('gameCanvas');
+            if (canvas && canvas.offsetParent !== null && window.getComputedStyle(canvas).pointerEvents === 'auto') return PHASE.GAMEPLAY;
+            return PHASE.START;
+        }
         var canvas = document.getElementById('gameCanvas');
-        if (canvas && canvas.offsetParent !== null && window.getComputedStyle(canvas).pointerEvents === 'auto') return PHASE.GAMEPLAY;
-        if (canvas && canvas.offsetParent !== null) return PHASE.START;
+        if (canvas && canvas.offsetParent !== null) return PHASE.GAMEPLAY;
         return PHASE.LOADING;
     }
 
@@ -555,7 +672,22 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
 
     function doPhaseStart() {
         phaseTicksInPhase++;
-        clickAllVisible();
+        // Try to find the actual Start button by text content first
+        var startBtn = null;
+        document.querySelectorAll('#mainPageGameStart button, #mainPageGameStart [role="button"]').forEach(function(el) {
+            if (el.offsetParent !== null && (el.textContent || '').trim().toLowerCase() === 'start') {
+                startBtn = el;
+            }
+        });
+        if (startBtn) {
+            var r = startBtn.getBoundingClientRect();
+            if (r.width > 0) {
+                fireAllEventsAt(startBtn, r.left + r.width/2, r.top + r.height/2, 'start-btn');
+                try { startBtn.click(); } catch(e) {}
+            }
+        } else {
+            clickAllVisible();
+        }
         var els = ['[class*="start" i]', '[id*="start" i]', '[class*="play" i]', '[class*="restart" i]', '#startButton', '#playButton'];
         for (var i = 0; i < els.length; i++) {
             var found = document.querySelectorAll(els[i]);
@@ -574,9 +706,10 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
     function doPhaseGameplay() {
         console.log(`${PREFIX} AUTO-PLAY: Jumping!`);
         
-        // Multiple rapid clicks on center of screen
-        var centerX = window.innerWidth / 2;
-        var centerY = window.innerHeight * 0.6;
+        // Vary tap position periodically
+        var tickPhase = phaseTicksInPhase % 10;
+        var centerX = window.innerWidth / 2 + (tickPhase < 5 ? rng() * 2 : rng() * 4);
+        var centerY = window.innerHeight * (0.55 + (tickPhase % 3) * 0.05);
         
         // Try clicking on body/document directly (most aggressive)
         fireAllEventsAt(document.body, centerX, centerY, 'body-jump');
@@ -587,41 +720,64 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
             fireAllEventsAt(mainPage, centerX, centerY, 'mainpage-jump');
         }
         
-        // Canvas
+        // Canvas - also try to focus it for keyboard events
         var canvas = document.getElementById('gameCanvas') || document.querySelector('canvas');
         if (canvas) {
             fireAllEventsAt(canvas, centerX, centerY, 'canvas-jump');
+            try { canvas.focus(); } catch(e) {}
         }
         
-        // Keyboard Space - keep trying
+        // Focus document body for keyboard events
+        try { document.body.focus(); } catch(e) {}
+        
+        // Keyboard: Space (primary jump key)
         try {
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', keyCode: 32, bubbles: true, cancelable: true }));
-            setTimeout(() => {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', keyCode: 32, which: 32, bubbles: true, cancelable: true }));
+            setTimeout(function() {
                 try {
-                    document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', keyCode: 32, bubbles: true, cancelable: true }));
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', keyCode: 32, which: 32, bubbles: true, cancelable: true }));
                 } catch(e) {}
-            }, 50);
+            }, 40 + Math.random() * 30);
         } catch(e) {}
         
-        // Enter key
+        // Keyboard: Spacebar key (legacy)
         try {
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }));
-            setTimeout(() => {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Spacebar', code: 'Space', keyCode: 32, which: 32, bubbles: true, cancelable: true }));
+            setTimeout(function() {
                 try {
-                    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }));
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Spacebar', code: 'Space', keyCode: 32, which: 32, bubbles: true, cancelable: true }));
                 } catch(e) {}
-            }, 50);
+            }, 40 + Math.random() * 30);
         } catch(e) {}
         
-        // Also fire touch on whole document
+        // Keyboard: ArrowUp (alternate jump key)
         try {
-            var touch = new Touch({ identifier: Date.now() % 99999 + 1, target: document.body, clientX: centerX, clientY: centerY, screenX: centerX, screenY: centerY, pageX: centerX, pageY: centerY, radiusX: 10, radiusY: 10, force: 1 });
-            document.dispatchEvent(new TouchEvent('touchstart', { cancelable: true, bubbles: true, touches: [touch], targetTouches: [touch], changedTouches: [touch] }));
-            setTimeout(() => {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38, which: 38, bubbles: true, cancelable: true }));
+            setTimeout(function() {
                 try {
-                    document.dispatchEvent(new TouchEvent('touchend', { cancelable: true, bubbles: true, touches: [], targetTouches: [], changedTouches: [touch] }));
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38, which: 38, bubbles: true, cancelable: true }));
                 } catch(e) {}
-            }, 50);
+            }, 40 + Math.random() * 30);
+        } catch(e) {}
+        
+        // Keyboard: Enter key
+        try {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+            setTimeout(function() {
+                try {
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+                } catch(e) {}
+            }, 40 + Math.random() * 30);
+        } catch(e) {}
+        
+        // Keyboard: 'w' key (some games use W for jump)
+        try {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', code: 'KeyW', keyCode: 87, which: 87, bubbles: true, cancelable: true }));
+            setTimeout(function() {
+                try {
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'w', code: 'KeyW', keyCode: 87, which: 87, bubbles: true, cancelable: true }));
+                } catch(e) {}
+            }, 40 + Math.random() * 30);
         } catch(e) {}
     }
 
@@ -629,7 +785,22 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         clickAllVisible();
         var claimed = claimRewards();
         if (claimed) claimCount++;
-        var restartEls = document.querySelectorAll('[class*="restart" i], [class*="again" i], [class*="replay" i]');
+        // Also check modal-root for claim/collect buttons (game-over popups)
+        document.querySelectorAll('#modal-root button, #modal-root [role="button"]').forEach(function(el) {
+            if (el.offsetParent === null) return;
+            var t = (el.textContent || '').trim().toLowerCase();
+            for (var ci = 0; ci < ['claim', 'collect', 'get', 'reward', 'continue', 'take', 'ok'].length; ci++) {
+                if (t.includes(['claim', 'collect', 'get', 'reward', 'continue', 'take', 'ok'][ci])) {
+                    var r = el.getBoundingClientRect();
+                    if (r.width > 0) {
+                        fireAllEventsAt(el, r.left + r.width / 2, r.top + r.height / 2, 'modal-claim');
+                        try { el.click(); } catch (e) {}
+                    }
+                    break;
+                }
+            }
+        });
+        var restartEls = document.querySelectorAll('[class*="restart" i], [class*="again" i], [class*="replay" i], [class*="retry" i]');
         for (var i = 0; i < restartEls.length; i++) {
             try {
                 if (restartEls[i].offsetParent !== null) {
@@ -643,6 +814,7 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
 
     function fireAllEventsAt(target, x, y, label) {
         var jx = x + rng(), jy = y + rng();
+        var touchId = Date.now() % 99999 + 1;
         
         // Try click() first - most reliable
         try { target.click(); } catch(e) {}
@@ -650,47 +822,44 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         // Touch events
         if (typeof Touch !== 'undefined' && typeof TouchEvent !== 'undefined') {
             try {
-                const touch = new Touch({ identifier: Date.now() % 99999 + 1, target: target, clientX: jx, clientY: jy, screenX: jx + window.screenX || 0, screenY: jy + window.screenY || 0, pageX: jx, pageY: jy, radiusX: 5, radiusY: 5, force: 1 });
+                const touch = new Touch({ identifier: touchId, target: target, clientX: jx, clientY: jy, screenX: jx + (window.screenX || 0), screenY: jy + (window.screenY || 0), pageX: jx, pageY: jy, radiusX: 5, radiusY: 5, force: 0.5 + Math.random() * 0.5 });
                 target.dispatchEvent(new TouchEvent('touchstart', { cancelable: true, bubbles: true, touches: [touch], targetTouches: [touch], changedTouches: [touch] }));
+                setTimeout(() => {
+                    try {
+                        const moveTouch = new Touch({ identifier: touchId, target: target, clientX: jx + rng(), clientY: jy + rng(), screenX: jx + (window.screenX || 0), screenY: jy + (window.screenY || 0), pageX: jx + rng(), pageY: jy + rng(), radiusX: 6, radiusY: 7, force: 0.7 + Math.random() * 0.3 });
+                        target.dispatchEvent(new TouchEvent('touchmove', { cancelable: true, bubbles: true, touches: [moveTouch], targetTouches: [moveTouch], changedTouches: [moveTouch] }));
+                    } catch(e) {}
+                }, 20);
                 setTimeout(() => {
                     try {
                         target.dispatchEvent(new TouchEvent('touchend', { cancelable: true, bubbles: true, touches: [], targetTouches: [], changedTouches: [touch] }));
                     } catch(e) {}
-                }, 50);
+                }, 50 + Math.random() * 30);
             } catch(e) { console.log(PREFIX + ' Touch error:', e.message); }
         }
         
         // Pointer events
         try {
-            target.dispatchEvent(new PointerEvent('pointerdown', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: 1, width: 10, height: 10, pressure: 1 }));
+            target.dispatchEvent(new PointerEvent('pointerdown', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: touchId, width: 10 + Math.random() * 10, height: 10 + Math.random() * 10, pressure: 0.5 + Math.random() * 0.5 }));
             setTimeout(() => {
                 try {
-                    target.dispatchEvent(new PointerEvent('pointerup', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: 1, width: 10, height: 10, pressure: 0 }));
+                    target.dispatchEvent(new PointerEvent('pointermove', { cancelable: true, bubbles: true, clientX: jx + rng(), clientY: jy + rng(), pointerType: 'touch', pointerId: touchId, width: 10, height: 10, pressure: 0.8 }));
                 } catch(e) {}
-            }, 50);
+            }, 20);
+            setTimeout(() => {
+                try {
+                    target.dispatchEvent(new PointerEvent('pointerup', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: touchId, width: 10, height: 10, pressure: 0 }));
+                } catch(e) {}
+            }, 50 + Math.random() * 30);
         } catch(e) {}
         
         // Mouse events
         try {
             target.dispatchEvent(new MouseEvent('mousedown', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, button: 0 }));
-            target.dispatchEvent(new MouseEvent('mousemove', { cancelable: true, bubbles: true, clientX: jx + 1, clientY: jy + 1 }));
+            target.dispatchEvent(new MouseEvent('mousemove', { cancelable: true, bubbles: true, clientX: jx + rng(), clientY: jy + rng() }));
             target.dispatchEvent(new MouseEvent('mouseup', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, button: 0 }));
             target.dispatchEvent(new MouseEvent('click', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, button: 0 }));
         } catch(e) {}
-        
-        // Canvas-specific: try getContext and draw
-        if (target.tagName === 'CANVAS') {
-            try {
-                const ctx = target.getContext('2d');
-                if (ctx) {
-                    // Simulate tap in center
-                    const rect = target.getBoundingClientRect();
-                    const tapX = rect.width / 2;
-                    const tapY = rect.height / 2;
-                    // Game might listen for touch events on canvas
-                }
-            } catch(e) {}
-        }
     }
 
     function tapTarget() {
@@ -710,7 +879,13 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         }
         try {
             if (currentPhase === PHASE.START) { doPhaseStart(); }
-            else if (currentPhase === PHASE.GAMEPLAY) { doPhaseGameplay(); }
+            else if (currentPhase === PHASE.GAMEPLAY) {
+                doPhaseGameplay();
+                if (autoStopOnTarget && targetScore > 0 && phaseTicksInPhase > 250) {
+                    console.warn(`${PREFIX} Gameplay timeout (${phaseTicksInPhase} ticks), forcing death`);
+                    window.__spacejump?.disableAutoPlay();
+                }
+            }
             else if (currentPhase === PHASE.FINISH) { doPhaseFinish(); }
         } catch(e) {}
     }
@@ -804,7 +979,20 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
             autoPlayTargetFound = false;
             autoPlayClickCount = 0;
             currentScore = 0;
-            autoPlayInterval = setInterval(tapTarget, 100);
+            if (targetScore <= 0) {
+                targetScore = 100;
+                console.log(`${PREFIX} Default target score set to 100`);
+            }
+            // Try to enable the game's built-in clicker
+            try {
+                var clickerBtn = document.querySelector('button[title="Toggle Clicker"]');
+                if (clickerBtn) {
+                    clickerBtn.click();
+                    console.log(`${PREFIX} Toggled built-in clicker`);
+                }
+            } catch(e) {}
+            gameplayTickLimit = 0;
+            autoPlayInterval = setInterval(tapTarget, 80 + Math.floor(Math.random() * 40));
             console.log(`${PREFIX} Auto-play ENABLED (manual trigger)`);
             dispatchStatus();
         },
@@ -814,6 +1002,14 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
                 autoPlayInterval = null;
             }
             autoPlayEnabled = false;
+            // Also toggle off built-in clicker so character doesn't auto-survive
+            try {
+                var clickerBtn = document.querySelector('button[title="Toggle Clicker"]');
+                if (clickerBtn && clickerBtn.textContent.trim() !== 'Toggle Clicker') {
+                    clickerBtn.click();
+                    console.log(`${PREFIX} Toggled off built-in clicker`);
+                }
+            } catch(e) {}
             console.log(`${PREFIX} Auto-play DISABLED`);
             dispatchStatus();
         },
@@ -855,8 +1051,25 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         } catch(e) {}
     }, 2000);
 
-    setInterval(dispatchStatus, 2000);
+    setInterval(dispatchStatus, 1000);
     dispatchStatus();
+
+    // Listen for commands from extension UI via chrome.runtime
+    try {
+        chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+            if (msg.type === 'spacejump-command') {
+                handleCommand(msg.action, msg.value);
+                sendResponse({ success: true });
+            }
+            return true;
+        });
+    } catch(e) {}
+
+    // Listen for commands from parent window via postMessage (isolated world bridge)
+    window.addEventListener('message', function(e) {
+        if (e.data?.type !== 'spacejump:command') return;
+        handleCommand(e.data.action, e.data.value);
+    });
 
     // Auto-play triggered at will - via postMessage or localStorage
     // Commands: toggleAutoPlay, enableAutoPlay, disableAutoPlay, setTargetScore

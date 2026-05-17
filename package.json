@@ -6,6 +6,10 @@
     "start:fly": "pnpm -F purrfect-fly start"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "sharp": "^0.34.5"
+  },
+  "dependencies": {
+    "@epic-web/invariant": "^1.0.0"
   }
 }

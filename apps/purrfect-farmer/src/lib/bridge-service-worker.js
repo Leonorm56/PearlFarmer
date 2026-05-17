@@ -2,6 +2,16 @@ import { uuid } from "@/utils";
 
 if (typeof import.meta.env.VITE_BRIDGE !== "undefined") {
   let spacejumpData = { status: null, userData: null };
+  let spacejumpPort = null;
+
+  /** Listen for commands from extension UI */
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === 'spacejump-command' && spacejumpPort) {
+      spacejumpPort.postMessage(msg);
+      sendResponse({ success: true });
+    }
+    return true;
+  });
 
   chrome.runtime.onConnectExternal.addListener((port) => {
     /** Create Maps */
@@ -10,6 +20,7 @@ if (typeof import.meta.env.VITE_BRIDGE !== "undefined") {
 
     /** Handle spacejump-status messages */
     if (port.name?.startsWith('mini-app:')) {
+      spacejumpPort = port;
       port.onMessage.addListener((message) => {
         if (message.type === 'spacejump-status') {
           spacejumpData = message.data;

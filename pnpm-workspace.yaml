@@ -1,21 +1,10 @@
 packages:
-  - apps/*
-  - packages/*
-
+  - "apps/*"
+  - "packages/*"
 allowBuilds:
-  bufferutil: true
-  es5-ext: true
-  protobufjs: true
+  bufferutil: set this to true or false
+  es5-ext: set this to true or false
+  protobufjs: set this to true or false
   sharp: true
-  sqlite3: true
-  utf-8-validate: true
-
-onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
-  - bufferutil
-  - es5-ext
-  - esbuild
-  - protobufjs
-  - sharp
-  - sqlite3
-  - utf-8-validate
+  sqlite3: set this to true or false
+  utf-8-validate: set this to true or false

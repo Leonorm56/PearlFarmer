@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Container from "@/components/Container";
 import { Dialog } from "radix-ui";
 import FarmerHeader from "@/components/FarmerHeader";
@@ -32,26 +32,44 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
   );
 
   const [spaceJumpInfo, setSpaceJumpInfo] = useState(null);
-  const [networkError, setNetworkError] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [localStarted, setLocalStarted] = useState(false);
+  const commandsSent = useRef(false);
 
   const { value: scoreRange, storeValue: setScoreRange } = useStorageState(
     `farmer-storage:${context.id}:score-range`,
     500,
   );
 
+  const sendCommand = (action, value = null) => {
+    try {
+      chrome.runtime.sendMessage({ type: 'spacejump-command', action, value });
+      console.log('[SpaceJumpFarmer] Sent command:', action, value);
+    } catch (e) {
+      console.error('[SpaceJumpFarmer] Command error:', e);
+    }
+  };
+
+  const handleToggle = () => {
+    const next = !localStarted;
+    setLocalStarted(next);
+    if (next && !commandsSent.current) {
+      commandsSent.current = true;
+      sendCommand('enableAutoPlay');
+      sendCommand('setTargetScore', scoreRange);
+      sendCommand('setAutoStopOnTarget', true);
+    } else if (!next) {
+      commandsSent.current = false;
+      sendCommand('disableAutoPlay');
+    }
+  };
+
+  useEffect(() => () => sendCommand('disableAutoPlay'), []);
+
   const tgUser = instance?.getTelegramUser?.();
   const username = tgUser?.username ? `@${tgUser.username}` : null;
 
   useEffect(() => {
-    if (!started) {
-      setSpaceJumpInfo({ coin: 0, bill: 0, games: 0, score: 0 });
-      setNetworkError(null);
-      return;
-    }
-
-    setSpaceJumpInfo({ coin: 0, bill: 0, games: 0, score: 0 });
-    setNetworkError("Waiting for game data...");
-    
     let mounted = true;
 
     const pollGameStatus = () => {
@@ -61,7 +79,6 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
         if (!mounted) return;
         
         const data = result.spacejumpData;
-        console.log("[SpaceJumpUI] storage:", data);
         
         if (data?.userData) {
           setSpaceJumpInfo({
@@ -71,17 +88,17 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
             score: data.status?.score ?? 0,
             playing: data.status?.autoPlayEnabled ?? false,
           });
-          setNetworkError(null);
+          setStatusMessage(null);
         } else {
-          setNetworkError("Waiting for game data...");
+          setStatusMessage("Waiting for game data...");
         }
       });
     };
 
     pollGameStatus();
-    const interval = setInterval(pollGameStatus, 3000);
+    const interval = setInterval(pollGameStatus, 1000);
     return () => { mounted = false; clearInterval(interval); };
-  }, [started, instance]);
+  }, []);
 
   return (
     <TerminalFarmerContext.Provider value={terminalFarmer}>
@@ -119,9 +136,9 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
           </div>
         )}
 
-        {networkError && (
-          <div className="px-3 py-0.5 text-xs text-center bg-red-900/50 text-red-400 border-b dark:border-neutral-600">
-            {networkError}
+        {statusMessage && (
+          <div className="px-3 py-0.5 text-xs text-center bg-yellow-900/50 text-yellow-400 border-b dark:border-neutral-600">
+            {statusMessage}
           </div>
         )}
 
@@ -146,9 +163,9 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
 
           <div className="py-1 px-2 rounded-lg bg-neutral-900/30 border border-neutral-700">
             <input
-              min="400"
+              min="1"
               max="1000"
-              placeholder="400-1000"
+              placeholder="1-1000"
               className="w-full px-2 py-1 rounded text-xs bg-neutral-800 border border-neutral-600 outline-0 text-center placeholder:text-neutral-600 focus:border-neutral-500"
               type="number"
               value={scoreRange || 500}
@@ -156,7 +173,7 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
             />
           </div>
 
-          {started && spaceJumpInfo && (
+          {localStarted && spaceJumpInfo && (
             <div className="py-1 px-2 rounded-lg bg-neutral-700/30 border border-neutral-600">
               <div className="flex items-center justify-center gap-1">
                 <div className={`w-1.5 h-1.5 rounded-full ${spaceJumpInfo?.playing ? 'bg-green-500 animate-pulse' : 'bg-neutral-400'}`} />
@@ -170,16 +187,16 @@ export const SpaceJumpFarmerContent = ({ terminalFarmer }) => {
 
         <div className="flex items-center justify-center gap-2 cursor-pointer px-2">
           <button
-            onClick={() => toggle(!started)}
+            onClick={handleToggle}
             className={cn(
               "px-12 py-2.5 rounded-lg font-medium",
-              started 
+              localStarted 
                 ? "bg-red-600 hover:bg-red-700 text-white" 
                 : "bg-nile-gold-600 hover:bg-nile-gold-700 text-neutral-900",
               "transition-colors",
             )}
           >
-            {started ? "Stop" : "Start"}
+            {localStarted ? "Stop Auto-Play" : "Start Auto-Play"}
           </button>
         </div>
 

@@ -101,6 +101,10 @@ export default function useDropFarmerInstance({
     instance.setProfileUpdateHandler?.(updateProfile);
     instance.setTelegramWebApp?.(telegramWebApp);
     instance.setTelegramClient?.(telegramClient.ref.current);
+    if (FarmerClass.localOnly) {
+      instance.configureDevice?.();
+      return;
+    }
     return instance.configureApi?.(api);
   }, [
     instance,
