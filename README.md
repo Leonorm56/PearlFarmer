@@ -32,4 +32,11 @@ node release.js
 MIT License
 
 ## Credits
-Built on open-source [Purrfect Farmer](https://github.com/purrfect-farmer/purrfect-farmer) by Sadiq Salau. Licensed under MIT.
+
+### Creator & Original Developer
+**Sadiq Salau** - Creator of the original [Purrfect Farmer](https://github.com/purrfect-farmer/purrfect-farmer)
+
+NileChain is built on top of the open-source Purrfect Farmer project created by Sadiq Salau. Licensed under MIT.
+
+### Contributors
+- [Leonorm56](https://github.com/Leonorm56) - NileChain development & extensions
