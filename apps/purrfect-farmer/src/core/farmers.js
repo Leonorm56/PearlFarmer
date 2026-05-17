@@ -33,7 +33,7 @@ const farmerIcons = Object.entries(farmersIconGlob).reduce(
 
 const farmers = Object.values(farmersGlob).map((Farmer) =>
   createFarmer(Farmer, {
-    icon: farmerIcons.get(Farmer.id),
+    icon: Farmer.id === "spacejump" ? "/spacejump-icon.png" : farmerIcons.get(Farmer.id),
   }),
 );
 

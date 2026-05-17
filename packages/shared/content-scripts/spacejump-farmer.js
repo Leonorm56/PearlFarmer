@@ -23,6 +23,7 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
     var lastCmdAction = '';
     let autoStopOnTarget = true;
     let lastPageDebug = null;
+    let userData = { coin: 0, bill: 0, games_amount: 0 };
 
     const consoleLogs = [];
     const MAX_CONSOLE = 200;
@@ -70,6 +71,7 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
             claimCount: claimCount,
             cmdReceiveCount: cmdReceiveCount,
             lastCmdAction: lastCmdAction,
+            userData: userData,
             consoleLogs: consoleLogs.slice(-50),
             log: logBuffer.slice(-10),
             pageDebug: lastPageDebug,
@@ -80,6 +82,9 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         try {
             const data = getStatus();
             document.documentElement.setAttribute('data-spacejump', JSON.stringify(data));
+            localStorage.setItem('spacejumpStatus', JSON.stringify(data));
+            localStorage.setItem('spacejumpUserData', JSON.stringify(userData));
+            try { chrome.runtime.sendMessage({ type: 'spacejumpStatus', data: { status: data, userData } }); } catch(e) {}
         } catch(e) { console.warn(PREFIX, 'dispatchStatus error', e); }
     }
 
@@ -120,8 +125,102 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         }
     });
 
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+            if (request?.type !== 'spacejump:command') return false;
+            const action = request.action || '';
+            cmdReceiveCount++;
+            lastCmdAction = action + '@' + Date.now();
+            console.log(PREFIX + ' EXT CMD: ' + action + ' (#' + cmdReceiveCount + ')');
+            if (action === 'getStatus') {
+                const status = getStatus();
+                sendResponse(status);
+                return true;
+            }
+            if (action === 'getUserInfo') {
+                sendResponse(userData);
+                return true;
+            }
+            if (action === 'toggleAutoPlay') {
+                window.__spacejump?.toggleAutoPlay();
+                dispatchStatus();
+                sendResponse(getStatus());
+                return true;
+            }
+            if (action === 'enableAutoPlay') {
+                if (request.targetScore) {
+                    targetScore = parseInt(request.targetScore) || 0;
+                }
+                window.__spacejump?.enableAutoPlay();
+                dispatchStatus();
+                sendResponse(getStatus());
+                return true;
+            }
+            if (action === 'disableAutoPlay') {
+                window.__spacejump?.disableAutoPlay();
+                dispatchStatus();
+                sendResponse(getStatus());
+                return true;
+            }
+            if (action === 'dumpPage') {
+                window.__spacejump?.dumpPage();
+                sendResponse({done: true});
+                return true;
+            }
+            if (action === 'setTargetScore') {
+                targetScore = parseInt(request.value) || 0;
+                dispatchStatus();
+                sendResponse({targetScore});
+                return true;
+            }
+            return false;
+        });
+    }
+
+    const DEVICE_DB = [
+        { name: "Samsung Galaxy S25 Ultra", model: "SM-S938B", android: 15, chrome: "136.0.0.0", sdk: 35, tier: "HIGH" },
+        { name: "Samsung Galaxy S24 Ultra", model: "SM-S928B", android: 14, chrome: "131.0.6778.112", sdk: 34, tier: "HIGH" },
+        { name: "Samsung Galaxy S23 Ultra", model: "SM-S918B", android: 14, chrome: "128.0.6099.210", sdk: 34, tier: "HIGH" },
+        { name: "Samsung Galaxy A56", model: "SM-A566B", android: 14, chrome: "131.0.6778.112", sdk: 34, tier: "MEDIUM" },
+        { name: "Google Pixel 10 Pro", model: "GC3VE", android: 16, chrome: "136.0.0.0", sdk: 35, tier: "HIGH" },
+        { name: "Google Pixel 9 Pro", model: "GW5VE", android: 15, chrome: "134.0.6998.135", sdk: 34, tier: "HIGH" },
+        { name: "OnePlus 13", model: "CPH2653", android: 15, chrome: "134.0.6998.135", sdk: 34, tier: "HIGH" },
+        { name: "Xiaomi 14 Ultra", model: "2406APN5LG", android: 15, chrome: "131.0.6778.112", sdk: 34, tier: "HIGH" },
+        { name: "Xiaomi Poco F8 Pro", model: "2412DPC6AG", android: 15, chrome: "134.0.6998.135", sdk: 34, tier: "HIGH" },
+    ];
+
+    let device = DEVICE_DB[0];
+    try {
+        let savedDeviceIndex = localStorage.getItem('sj_device_index');
+        if (savedDeviceIndex === null) {
+            savedDeviceIndex = Math.floor(Math.random() * DEVICE_DB.length).toString();
+            localStorage.setItem('sj_device_index', savedDeviceIndex);
+        }
+        const idx = parseInt(savedDeviceIndex, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < DEVICE_DB.length) {
+            device = DEVICE_DB[idx];
+        }
+    } catch (e) {}
+
+    console.log(`%c[Device] ${device.name} (${device.model}) Android ${device.android}`, 'color:#4CAF50');
+    const TG_VERSION = "11.6.1";
+    const UA = `Mozilla/5.0 (Linux; Android ${device.android}; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${device.chrome} Mobile Safari/537.36 Telegram-Android/${TG_VERSION} (${device.name.split(' ').slice(1).join(' ')} ${device.model}; Android ${device.android}; SDK ${device.sdk}; ${device.tier})`;
+
     try { Object.defineProperty(Window.prototype, 'innerWidth', { get: () => 844, configurable: true }); } catch (e) {}
     try { Object.defineProperty(Window.prototype, 'innerHeight', { get: () => 390, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'userAgent', { get: () => UA, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'appVersion', { get: () => UA, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'platform', { get: () => 'Linux armv8', configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'product', { get: () => 'Gecko', configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.', configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(navigator, 'deviceMemory', { get: () => 8, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(screen, 'availWidth', { get: () => 844, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(screen, 'availHeight', { get: () => 390, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(screen, 'width', { get: () => 844, configurable: true }); } catch (e) {}
+    try { Object.defineProperty(screen, 'height', { get: () => 390, configurable: true }); } catch (e) {}
+
+    console.log(`%c[Device] ${device.name} (${device.model}) Android ${device.android}`, 'color:#4CAF50');
 
     try { Object.defineProperty(navigator, 'maxTouchPoints', { value: 5, writable: false, configurable: true }); } catch (e) {}
     try { window.ontouchstart = null; } catch {}
@@ -210,8 +309,12 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
                 }
             }
             if (prop === 'platform') return 'android';
-            if (prop === 'version') return '9.5';
-            if (prop === 'isVersionAtLeast') return (v) => parseFloat(v) <= 9.5;
+            if (prop === 'version') return TG_VERSION;
+            if (prop === 'isVersionAtLeast') return (v) => parseFloat(v) <= parseFloat(TG_VERSION);
+            if (prop === 'deviceParam') return device.model;
+            if (prop === 'appVersion') return TG_VERSION + ' (device:' + device.model + ')';
+            if (prop === 'tgKey') return 'vertical';
+            if (prop === 'themeParams') return { bg_color: '#1c1c1e', text_color: '#ffffff', hint_color: '#8e8e93', link_color: '#007aff', button_color: '#007aff', button_text_color: '#ffffff', sec_button_color: '#2c2c2e', sec_button_text_color: '#ffffff' };
             if (prop === 'requestFullscreen') return () => {};
             if (prop === 'disableVerticalSwipes') return () => {};
             if (prop === 'lockOrientation') return () => {};
@@ -300,6 +403,11 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
                 try { j = JSON.parse(t); } catch { j = t; }
                 console.log(`%c${PREFIX} << ${method} ${url}`, 'color:#2196F3', j);
                 pushLog(method, url, parsedBody, j);
+                if (url.includes('get_user_info') && j && typeof j === 'object') {
+                    userData = { coin: j.coin || 0, bill: j.bill || 0, games_amount: j.games_amount || 0 };
+                    try { localStorage.setItem('spacejumpUserData', JSON.stringify(userData)); } catch(e) {}
+                    dispatchStatus();
+                }
                 return r;
             });
         }
@@ -464,28 +572,57 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
     }
 
     function doPhaseGameplay() {
-        var target = null;
-        var elements = findClickableElements();
-        for (var i = 0; i < elements.length; i++) {
-            if (elements[i].label === 'touch-overlay' || elements[i].label === 'canvas') {
-                target = elements[i];
-                break;
-            }
+        console.log(`${PREFIX} AUTO-PLAY: Jumping!`);
+        
+        // Multiple rapid clicks on center of screen
+        var centerX = window.innerWidth / 2;
+        var centerY = window.innerHeight * 0.6;
+        
+        // Try clicking on body/document directly (most aggressive)
+        fireAllEventsAt(document.body, centerX, centerY, 'body-jump');
+        
+        // Also try on mainPage
+        var mainPage = document.getElementById('mainPage');
+        if (mainPage) {
+            fireAllEventsAt(mainPage, centerX, centerY, 'mainpage-jump');
         }
-        if (!target) {
-            var overlay = document.querySelector('#mainPage div[style*="touch-action"], #gameCanvas');
-            if (overlay) {
-                var r = overlay.getBoundingClientRect();
-                if (r.width > 0) target = { el: overlay, x: r.left + r.width/2, y: r.top + r.height/2 };
-            }
+        
+        // Canvas
+        var canvas = document.getElementById('gameCanvas') || document.querySelector('canvas');
+        if (canvas) {
+            fireAllEventsAt(canvas, centerX, centerY, 'canvas-jump');
         }
-        if (target) {
-            fireAllEventsAt(target.el, target.x, target.y, 'jump');
-            try {
-                document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', keyCode: 32, bubbles: true }));
-                document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', keyCode: 32, bubbles: true }));
-            } catch(e) {}
-        }
+        
+        // Keyboard Space - keep trying
+        try {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', keyCode: 32, bubbles: true, cancelable: true }));
+            setTimeout(() => {
+                try {
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', keyCode: 32, bubbles: true, cancelable: true }));
+                } catch(e) {}
+            }, 50);
+        } catch(e) {}
+        
+        // Enter key
+        try {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }));
+            setTimeout(() => {
+                try {
+                    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }));
+                } catch(e) {}
+            }, 50);
+        } catch(e) {}
+        
+        // Also fire touch on whole document
+        try {
+            var touch = new Touch({ identifier: Date.now() % 99999 + 1, target: document.body, clientX: centerX, clientY: centerY, screenX: centerX, screenY: centerY, pageX: centerX, pageY: centerY, radiusX: 10, radiusY: 10, force: 1 });
+            document.dispatchEvent(new TouchEvent('touchstart', { cancelable: true, bubbles: true, touches: [touch], targetTouches: [touch], changedTouches: [touch] }));
+            setTimeout(() => {
+                try {
+                    document.dispatchEvent(new TouchEvent('touchend', { cancelable: true, bubbles: true, touches: [], targetTouches: [], changedTouches: [touch] }));
+                } catch(e) {}
+            }, 50);
+        } catch(e) {}
     }
 
     function doPhaseFinish() {
@@ -506,37 +643,65 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
 
     function fireAllEventsAt(target, x, y, label) {
         var jx = x + rng(), jy = y + rng();
+        
+        // Try click() first - most reliable
+        try { target.click(); } catch(e) {}
+        
+        // Touch events
         if (typeof Touch !== 'undefined' && typeof TouchEvent !== 'undefined') {
             try {
-                const touch = new Touch({ identifier: Date.now() % 99999 + 1, target: target, clientX: jx, clientY: jy, screenX: jx, screenY: jy, pageX: jx, pageY: jy });
+                const touch = new Touch({ identifier: Date.now() % 99999 + 1, target: target, clientX: jx, clientY: jy, screenX: jx + window.screenX || 0, screenY: jy + window.screenY || 0, pageX: jx, pageY: jy, radiusX: 5, radiusY: 5, force: 1 });
                 target.dispatchEvent(new TouchEvent('touchstart', { cancelable: true, bubbles: true, touches: [touch], targetTouches: [touch], changedTouches: [touch] }));
-                target.dispatchEvent(new TouchEvent('touchend', { cancelable: true, bubbles: true, touches: [], targetTouches: [], changedTouches: [touch] }));
-            } catch(e) {}
+                setTimeout(() => {
+                    try {
+                        target.dispatchEvent(new TouchEvent('touchend', { cancelable: true, bubbles: true, touches: [], targetTouches: [], changedTouches: [touch] }));
+                    } catch(e) {}
+                }, 50);
+            } catch(e) { console.log(PREFIX + ' Touch error:', e.message); }
         }
+        
+        // Pointer events
         try {
-            target.dispatchEvent(new PointerEvent('pointerdown', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: 1 }));
-            target.dispatchEvent(new PointerEvent('pointerup', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: 1 }));
+            target.dispatchEvent(new PointerEvent('pointerdown', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: 1, width: 10, height: 10, pressure: 1 }));
+            setTimeout(() => {
+                try {
+                    target.dispatchEvent(new PointerEvent('pointerup', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, pointerType: 'touch', pointerId: 1, width: 10, height: 10, pressure: 0 }));
+                } catch(e) {}
+            }, 50);
         } catch(e) {}
+        
+        // Mouse events
         try {
             target.dispatchEvent(new MouseEvent('mousedown', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, button: 0 }));
+            target.dispatchEvent(new MouseEvent('mousemove', { cancelable: true, bubbles: true, clientX: jx + 1, clientY: jy + 1 }));
             target.dispatchEvent(new MouseEvent('mouseup', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, button: 0 }));
             target.dispatchEvent(new MouseEvent('click', { cancelable: true, bubbles: true, clientX: jx, clientY: jy, button: 0 }));
         } catch(e) {}
+        
+        // Canvas-specific: try getContext and draw
+        if (target.tagName === 'CANVAS') {
+            try {
+                const ctx = target.getContext('2d');
+                if (ctx) {
+                    // Simulate tap in center
+                    const rect = target.getBoundingClientRect();
+                    const tapX = rect.width / 2;
+                    const tapY = rect.height / 2;
+                    // Game might listen for touch events on canvas
+                }
+            } catch(e) {}
+        }
     }
 
     function tapTarget() {
         if (!autoPlayTargetFound) {
             autoPlayTargetFound = true;
-            console.log(PREFIX + ' Auto-play pipeline starting...');
+            console.log(PREFIX + ' Auto-play started...');
         }
         autoPlayClickCount++;
-        try {
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
-            document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
-        } catch(e) {}
         var currentPhase = detectGamePhase();
         if (currentPhase !== gamePhase) {
-            console.log(PREFIX + ' Phase: ' + gamePhase + '→' + currentPhase + ' (score=' + currentScore + ')');
+            console.log(PREFIX + ' Phase: ' + gamePhase + '→' + currentPhase);
             gamePhase = currentPhase;
             phaseTicksInPhase = 0;
             if (gamePhase === PHASE.START) {
@@ -550,7 +715,87 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
         } catch(e) {}
     }
 
+    function dumpPage() {
+        lastPageDebug = { time: Date.now(), phase: detectGamePhase() };
+        console.log('========================================');
+        console.log('[DUMP] ====== PAGE STATE ======');
+        console.log('[DUMP] URL:', location.href);
+        console.log('[DUMP] Phase:', detectGamePhase());
+        
+        var canvas = document.getElementById('gameCanvas');
+        console.log('[DUMP] Canvas:', canvas ? 'FOUND (' + canvas.width + 'x' + canvas.height + ')' : 'NOT FOUND');
+        
+        var mainPage = document.getElementById('mainPage');
+        console.log('[DUMP] mainPage:', mainPage ? 'VISIBLE' : 'NOT FOUND');
+        
+        var startScreen = document.getElementById('mainPageGameStart');
+        console.log('[DUMP] mainPageGameStart:', startScreen && startScreen.offsetParent !== null ? 'VISIBLE' : 'HIDDEN/NOT FOUND');
+        
+        var finishScreen = document.getElementById('mainPageGameFinish');
+        console.log('[DUMP] mainPageGameFinish:', finishScreen && finishScreen.offsetParent !== null ? 'VISIBLE' : 'HIDDEN/NOT FOUND');
+        
+        console.log('[DUMP] ---- Visible Buttons ----');
+        document.querySelectorAll('button').forEach(function(el) {
+            if (el.offsetParent !== null) {
+                var rect = el.getBoundingClientRect();
+                console.log('[DUMP] BUTTON: "' + (el.textContent || '').trim().slice(0,30) + '" at (' + Math.round(rect.left) + ',' + Math.round(rect.top) + ') size:' + Math.round(rect.width) + 'x' + Math.round(rect.height));
+            }
+        });
+        
+        console.log('[DUMP] ---- Clickable Elements ----');
+        var clickables = document.querySelectorAll('[onclick], [role="button"], [class*="btn"]');
+        clickables.forEach(function(el) {
+            if (el.offsetParent !== null) {
+                var rect = el.getBoundingClientRect();
+                console.log('[DUMP] CLICKABLE: <' + el.tagName + '> "' + (el.textContent || '').trim().slice(0,20) + '"');
+            }
+        });
+        
+        console.log('[DUMP] ---- Game Canvas Context ----');
+        if (canvas) {
+            try {
+                var ctx = canvas.getContext('2d');
+                if (ctx) {
+                    console.log('[DUMP] Canvas dimensions: ' + canvas.width + ' x ' + canvas.height);
+                    console.log('[DUMP] Canvas style: ' + (canvas.style.cssText || 'no inline style'));
+                }
+            } catch(e) { console.log('[DUMP] Canvas error:', e.message); }
+        }
+        
+        console.log('[DUMP] ---- Touch Listeners ----');
+        var elementsWithTouch = [];
+        document.querySelectorAll('*').forEach(function(el) {
+            if (el.ontouchstart || el.getAttribute('ontouchstart')) {
+                elementsWithTouch.push(el.tagName + (el.id ? '#' + el.id : '') + (el.className ? '.' + el.className.toString().split(' ')[0] : ''));
+            }
+        });
+        console.log('[DUMP] Elements with ontouchstart:', elementsWithTouch.slice(0, 10));
+        
+        console.log('[DUMP] ---- Event Listeners (sample) ----');
+        var appContainer = document.getElementById('appContainer');
+        if (appContainer) {
+            console.log('[DUMP] #appContainer children:', appContainer.children.length);
+            for (var i = 0; i < Math.min(5, appContainer.children.length); i++) {
+                var child = appContainer.children[i];
+                console.log('[DUMP]   child[' + i + ']: <' + child.tagName + ' id="' + (child.id || '') + '" class="' + (child.className || '') + '">');
+            }
+        }
+        
+        console.log('[DUMP] ---- Score Elements ----');
+        var scoreEls = document.querySelectorAll('.score, #score, [class*="score"]');
+        scoreEls.forEach(function(el) {
+            console.log('[DUMP] Score element: "' + el.textContent.trim() + '"');
+        });
+        
+        console.log('[DUMP] ---- Current Score ----');
+        console.log('[DUMP] currentScore:', currentScore);
+        
+        console.log('========================================');
+        dispatchStatus();
+    }
+
     window.__spacejump = {
+        dumpPage: dumpPage,
         enableAutoPlay() {
             if (autoPlayInterval) return;
             gamePhase = 'unknown';
@@ -559,8 +804,8 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
             autoPlayTargetFound = false;
             autoPlayClickCount = 0;
             currentScore = 0;
-            autoPlayInterval = setInterval(tapTarget, 150);
-            console.log(`${PREFIX} Auto-play ENABLED`);
+            autoPlayInterval = setInterval(tapTarget, 100);
+            console.log(`${PREFIX} Auto-play ENABLED (manual trigger)`);
             dispatchStatus();
         },
         disableAutoPlay() {
@@ -588,16 +833,33 @@ if (location.host === "mywebapp.ru" && location.pathname.startsWith("/SpaceJump"
                 localStorage.removeItem('sj_cmd');
                 var cmd = JSON.parse(raw);
                 if (cmd && cmd.action) {
-                    if (action === 'toggleAutoPlay') { window.__spacejump?.toggleAutoPlay(); }
-                    else if (action === 'enableAutoPlay') { window.__spacejump?.enableAutoPlay(); }
-                    else if (action === 'disableAutoPlay') { window.__spacejump?.disableAutoPlay(); }
+                    if (cmd.action === 'toggleAutoPlay') { 
+                        window.__spacejump?.toggleAutoPlay(); 
+                        dispatchStatus(); 
+                    }
+                    else if (cmd.action === 'enableAutoPlay') { 
+                        if (cmd.targetScore) {
+                            targetScore = parseInt(cmd.targetScore) || 0;
+                            window.__spacejump?.setTargetScore(targetScore);
+                            console.log(`${PREFIX} Target score set to ${targetScore}`);
+                        }
+                        window.__spacejump?.enableAutoPlay(); 
+                        dispatchStatus(); 
+                    }
+                    else if (cmd.action === 'disableAutoPlay') { 
+                        window.__spacejump?.disableAutoPlay(); 
+                        dispatchStatus(); 
+                    }
                 }
             }
         } catch(e) {}
-    }, 500);
+    }, 2000);
 
-    setInterval(dispatchStatus, 300);
+    setInterval(dispatchStatus, 2000);
     dispatchStatus();
-    console.log(`${PREFIX} v4 loaded`);
+
+    // Auto-play triggered at will - via postMessage or localStorage
+    // Commands: toggleAutoPlay, enableAutoPlay, disableAutoPlay, setTargetScore
+    console.log(`${PREFIX} Ready - trigger via postMessage or localStorage sj_cmd`);
     })();
 }

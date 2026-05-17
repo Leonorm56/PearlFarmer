@@ -1,10 +1,22 @@
 import { uuid } from "@/utils";
 
 if (typeof import.meta.env.VITE_BRIDGE !== "undefined") {
+  let spacejumpData = { status: null, userData: null };
+
   chrome.runtime.onConnectExternal.addListener((port) => {
     /** Create Maps */
     const callables = new Map();
     const ports = new Map();
+
+    /** Handle spacejump-status messages */
+    if (port.name?.startsWith('mini-app:')) {
+      port.onMessage.addListener((message) => {
+        if (message.type === 'spacejump-status') {
+          spacejumpData = message.data;
+          chrome.storage.local.set({ spacejumpData });
+        }
+      });
+    }
 
     /**
      * @param {chrome.runtime.Port} port

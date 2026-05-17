@@ -1,4 +1,5 @@
 import BaseFarmer from "../lib/BaseFarmer.js";
+import { getDeviceForSession, getTelegramVersion, generateAndroidUserAgent } from "../utils/core.js";
 
 export default class DreamcoinProFarmer extends BaseFarmer {
   static id = "dreamcoin-pro";
@@ -15,8 +16,15 @@ export default class DreamcoinProFarmer extends BaseFarmer {
   static startupDelay = 60;
 
   configureApi() {
+    const device = getDeviceForSession(this.getUserId());
+    const tgVersion = getTelegramVersion(this.getUserId());
+    const userAgent = generateAndroidUserAgent(device, tgVersion);
+    
+    this.logger.log(`Device: ${device.name} (Android ${device.android}, Telegram ${tgVersion})`);
+    
     const interceptor = this.api.interceptors.request.use((config) => {
       config.url = this._updateUrl(config.url);
+      config.headers["User-Agent"] = userAgent;
       return config;
     });
     return () => this.api.interceptors.request.eject(interceptor);

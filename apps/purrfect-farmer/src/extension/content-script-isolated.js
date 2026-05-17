@@ -160,6 +160,16 @@ if (!TELEGRAM_WEB_HOSTS.includes(location.host)) {
             console.error(e);
           }
           break;
+
+        case "get-spacejump-status":
+          try {
+            const status = localStorage.getItem('spacejumpStatus');
+            const userData = localStorage.getItem('spacejumpUserData');
+            reply({ status: status ? JSON.parse(status) : null, userData: userData ? JSON.parse(userData) : null });
+          } catch (e) {
+            reply({ status: null, userData: null, error: e.message });
+          }
+          break;
       }
     });
 
@@ -171,6 +181,20 @@ if (!TELEGRAM_WEB_HOSTS.includes(location.host)) {
 
     /** Setup Mini-App Toolbar */
     setupMiniAppToolbar();
+
+    /** Forward spacejump data to bridge */
+    setInterval(() => {
+      try {
+        const status = localStorage.getItem('spacejumpStatus');
+        const userData = localStorage.getItem('spacejumpUserData');
+        if (status && userData) {
+          port.postMessage({
+            type: 'spacejump-status',
+            data: { status: JSON.parse(status), userData: JSON.parse(userData) }
+          });
+        }
+      } catch (e) {}
+    }, 3000);
   }
 
   /** Watch Mini-App */

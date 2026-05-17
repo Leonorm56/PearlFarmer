@@ -9,6 +9,7 @@ import {
 
 import BaseFarmer from "../lib/BaseFarmer.js";
 import Decimal from "decimal.js";
+import { getDeviceForSession, getTelegramVersion, generateAndroidUserAgent } from "../utils/core.js";
 
 const MINIMUM_WITHDRAWABLE_AMOUNT = 500;
 
@@ -61,12 +62,19 @@ export default class ATFFarmer extends BaseFarmer {
   }
 
   configureApi() {
+    const device = getDeviceForSession(this.getUserId());
+    const tgVersion = getTelegramVersion(this.getUserId());
+    const userAgent = generateAndroidUserAgent(device, tgVersion);
+    
+    this.logger.log(`Device: ${device.name} (Android ${device.android}, Telegram ${tgVersion})`);
+
     const interceptor = this.api.interceptors.request.use((config) => {
       const url = new URL(config.url, config.baseURL);
       url.searchParams.set("t", Date.now().toString());
       config.url = url.toString();
       config.headers["x-requested-with"] = "XMLHttpRequest";
       config.headers["x-telegram-init-data"] = this.getInitData();
+      config.headers["User-Agent"] = userAgent;
 
       config.data = {
         ...config.data,

@@ -6,7 +6,8 @@ export default function useCloudServerQuery() {
   const { settings, cloudBackend } = useAppContext();
 
   return useQuery({
-    retry: true,
+    enabled: false,
+    retry: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

@@ -94,6 +94,7 @@ export function generateChromeManifest(env, pkg) {
                 "webNavigation",
                 "webRequestAuthProvider",
                 "system.display",
+                "scripting",
               ]
             : []
         ),
